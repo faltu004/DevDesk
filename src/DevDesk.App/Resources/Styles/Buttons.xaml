@@ -4,7 +4,7 @@
     <!-- Nav Item Button Style -->
     <Style x:Key="Style.Button.Nav" TargetType="{x:Type RadioButton}">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Disabled}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Height" Value="42" />
         <Setter Property="Margin" Value="0,2" />
@@ -25,7 +25,7 @@
                             <!-- Left active indicator pill -->
                             <Rectangle x:Name="ActiveIndicator"
                                        Width="3"
-                                       Height="18"
+                                       Height="20"
                                        RadiusX="1.5"
                                        RadiusY="1.5"
                                        Fill="{DynamicResource Brush.Accent.Light}"
@@ -51,7 +51,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Disabled}" />
                             <Setter Property="Cursor" Value="Arrow" />
-                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Opacity" Value="0.75" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -101,15 +101,16 @@
         </Setter>
     </Style>
 
-    <!-- Standard Secondary Button Style -->
-    <Style x:Key="Style.Button.Secondary" TargetType="{x:Type Button}">
-        <Setter Property="Background" Value="{DynamicResource Brush.Background.Card}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+    <!-- Compact Row Action Button Style (e.g. Open, View Logs) -->
+    <Style x:Key="Style.Button.Action" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.CardSubtle}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Padding" Value="11,5" />
+        <Setter Property="Height" Value="29" />
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
@@ -130,10 +131,187 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
                             <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource Brush.Border.Medium}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Border" Property="Opacity" Value="0.45" />
+                            <Setter TargetName="Border" Property="Opacity" Value="0.6" />
                             <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Danger Outline Button (e.g. Stop) -->
+    <Style x:Key="Style.Button.DangerOutline" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Button.Danger.Bg}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Button.Danger.Text}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Button.Danger.Border}" />
+        <Setter Property="Padding" Value="11,5" />
+        <Setter Property="Height" Value="29" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="#2E121A" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource Brush.Status.Danger}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Border" Property="Opacity" Value="0.6" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Run Action Button (e.g. Run) -->
+    <Style x:Key="Style.Button.RunAction" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Accent.Primary}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent.Light}" />
+        <Setter Property="Padding" Value="13,5" />
+        <Setter Property="Height" Value="29" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Accent.Light}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Border" Property="Opacity" Value="0.6" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Quick Action Tile Button (2x2 Grid) -->
+    <Style x:Key="Style.Button.QuickActionTile" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.CardSubtle}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="MinHeight" Value="62" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource Brush.Border.Medium}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Border" Property="Opacity" Value="0.85" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Ghost / Link Button (e.g. View All -> or Clear History) -->
+    <Style x:Key="Style.Button.Link" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent.Light}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.6" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Ghost Icon Button (e.g. ...) -->
+    <Style x:Key="Style.Button.IconGhost" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Border" Background="Transparent" CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

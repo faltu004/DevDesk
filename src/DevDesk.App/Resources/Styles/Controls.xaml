@@ -7,32 +7,125 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="10" />
-        <Setter Property="Padding" Value="18" />
+        <Setter Property="Padding" Value="20,18" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- Sub Card Border Style (for inner 2x2 grid cards) -->
+    <Style x:Key="Style.Border.CardInner" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.CardSubtle}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- Search Box Border Style -->
+    <Style x:Key="Style.Border.Search" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.Input}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- Keyboard Shortcut Badge Border -->
+    <Style x:Key="Style.Border.ShortcutBadge" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Medium}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Status Badge Style (Running) -->
+    <Style x:Key="Style.Border.StatusBadge.Running" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Status.Success.Bg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Success.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Status Badge Style (Stopped) -->
+    <Style x:Key="Style.Border.StatusBadge.Stopped" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Brush.Status.Danger.Bg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Status.Danger.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Tag Pill Base Style -->
+    <Style x:Key="Style.Border.TagPill" TargetType="{x:Type Border}">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="7,2" />
+        <Setter Property="Margin" Value="0,0,6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <!-- Subtle Separator -->
     <Style x:Key="Style.Separator.Subtle" TargetType="{x:Type Separator}">
         <Setter Property="Background" Value="{DynamicResource Brush.Border.Subtle}" />
-        <Setter Property="Margin" Value="0,8" />
+        <Setter Property="Margin" Value="0,6" />
         <Setter Property="Height" Value="1" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <!-- Status Dot Style -->
+    <!-- Status Dot Style (Success / Green) -->
     <Style x:Key="Style.Ellipse.StatusDot" TargetType="{x:Type Ellipse}">
         <Setter Property="Width" Value="8" />
         <Setter Property="Height" Value="8" />
         <Setter Property="Fill" Value="{DynamicResource Brush.Status.Success}" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="0,0,8,0" />
+        <Setter Property="Margin" Value="0,0,6,0" />
     </Style>
 
-    <!-- ScrollBar & ScrollViewer Styling for Dark Theme -->
+    <!-- Status Dot Style (Danger / Red) -->
+    <Style x:Key="Style.Ellipse.StatusDot.Danger" TargetType="{x:Type Ellipse}">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="Fill" Value="{DynamicResource Brush.Status.Danger}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,6,0" />
+    </Style>
+
+    <!-- Modern Mini Progress Bar Style -->
+    <Style x:Key="Style.ProgressBar.Mini" TargetType="{x:Type ProgressBar}">
+        <Setter Property="Height" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource Brush.Background.Input}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ProgressBar}">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="3"
+                            ClipToBounds="True">
+                        <Grid x:Name="TemplateRoot">
+                            <Border x:Name="PART_Track" />
+                            <Border x:Name="PART_Indicator"
+                                    Background="{TemplateBinding Foreground}"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Left" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Clean, Subtle Dark Theme Scrollbar -->
     <Style TargetType="{x:Type ScrollBar}">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Muted}" />
-        <Setter Property="Width" Value="8" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Border.Medium}" />
+        <Setter Property="Width" Value="6" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
@@ -42,7 +135,15 @@
                                 <Thumb>
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="{x:Type Thumb}">
-                                            <Border Background="{DynamicResource Brush.Border.Medium}" CornerRadius="4" Margin="1" />
+                                            <Border x:Name="ThumbBorder"
+                                                    Background="{DynamicResource Brush.Border.Medium}"
+                                                    CornerRadius="3"
+                                                    Margin="0" />
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource Brush.Accent.Light}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Thumb.Template>
                                 </Thumb>

@@ -7,7 +7,8 @@
     <Color x:Key="Color.Background.Main">#0D1522</Color>
     <Color x:Key="Color.Background.Card">#111C2D</Color>
     <Color x:Key="Color.Background.CardHover">#152338</Color>
-    <Color x:Key="Color.Background.Input">#0A101A</Color>
+    <Color x:Key="Color.Background.CardSubtle">#0F1827</Color>
+    <Color x:Key="Color.Background.Input">#090E17</Color>
     <Color x:Key="Color.Background.NavActive">#122B48</Color>
     <Color x:Key="Color.Background.NavHover">#101D2F</Color>
 
@@ -20,18 +21,38 @@
     <Color x:Key="Color.Accent.Primary">#0284C7</Color>
     <Color x:Key="Color.Accent.Light">#38BDF8</Color>
     <Color x:Key="Color.Accent.Muted">#0E2A47</Color>
+    <Color x:Key="Color.Accent.Teal">#2DD4BF</Color>
 
     <!-- Text Colors -->
     <Color x:Key="Color.Text.Primary">#F8FAFC</Color>
     <Color x:Key="Color.Text.Secondary">#94A3B8</Color>
     <Color x:Key="Color.Text.Muted">#64748B</Color>
-    <Color x:Key="Color.Text.Disabled">#475569</Color>
+    <Color x:Key="Color.Text.Disabled">#8193AA</Color>
 
     <!-- Status Colors -->
     <Color x:Key="Color.Status.Success">#22C55E</Color>
+    <Color x:Key="Color.Status.Success.Bg">#0A291A</Color>
+    <Color x:Key="Color.Status.Success.Border">#165330</Color>
     <Color x:Key="Color.Status.Warning">#F59E0B</Color>
     <Color x:Key="Color.Status.Danger">#EF4444</Color>
+    <Color x:Key="Color.Status.Danger.Bg">#2C1116</Color>
+    <Color x:Key="Color.Status.Danger.Border">#581C24</Color>
     <Color x:Key="Color.Status.Info">#38BDF8</Color>
+
+    <!-- Tag & Pill Colors -->
+    <Color x:Key="Color.Tag.Blue.Bg">#102844</Color>
+    <Color x:Key="Color.Tag.Blue.Text">#38BDF8</Color>
+    <Color x:Key="Color.Tag.Slate.Bg">#162234</Color>
+    <Color x:Key="Color.Tag.Slate.Text">#94A3B8</Color>
+    <Color x:Key="Color.Tag.Purple.Bg">#28183E</Color>
+    <Color x:Key="Color.Tag.Purple.Text">#C084FC</Color>
+    <Color x:Key="Color.Tag.Dark.Bg">#141C2B</Color>
+    <Color x:Key="Color.Tag.Dark.Text">#E2E8F0</Color>
+
+    <!-- Danger Button Colors -->
+    <Color x:Key="Color.Button.Danger.Bg">#1E0F14</Color>
+    <Color x:Key="Color.Button.Danger.Border">#5C1D24</Color>
+    <Color x:Key="Color.Button.Danger.Text">#F87171</Color>
 
     <!-- Solid Color Brushes -->
     <SolidColorBrush x:Key="Brush.Background.Root" Color="{StaticResource Color.Background.Root}" />
@@ -39,6 +60,7 @@
     <SolidColorBrush x:Key="Brush.Background.Main" Color="{StaticResource Color.Background.Main}" />
     <SolidColorBrush x:Key="Brush.Background.Card" Color="{StaticResource Color.Background.Card}" />
     <SolidColorBrush x:Key="Brush.Background.CardHover" Color="{StaticResource Color.Background.CardHover}" />
+    <SolidColorBrush x:Key="Brush.Background.CardSubtle" Color="{StaticResource Color.Background.CardSubtle}" />
     <SolidColorBrush x:Key="Brush.Background.Input" Color="{StaticResource Color.Background.Input}" />
     <SolidColorBrush x:Key="Brush.Background.NavActive" Color="{StaticResource Color.Background.NavActive}" />
     <SolidColorBrush x:Key="Brush.Background.NavHover" Color="{StaticResource Color.Background.NavHover}" />
@@ -50,6 +72,7 @@
     <SolidColorBrush x:Key="Brush.Accent.Primary" Color="{StaticResource Color.Accent.Primary}" />
     <SolidColorBrush x:Key="Brush.Accent.Light" Color="{StaticResource Color.Accent.Light}" />
     <SolidColorBrush x:Key="Brush.Accent.Muted" Color="{StaticResource Color.Accent.Muted}" />
+    <SolidColorBrush x:Key="Brush.Accent.Teal" Color="{StaticResource Color.Accent.Teal}" />
 
     <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Text.Primary}" />
     <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Text.Secondary}" />
@@ -57,8 +80,25 @@
     <SolidColorBrush x:Key="Brush.Text.Disabled" Color="{StaticResource Color.Text.Disabled}" />
 
     <SolidColorBrush x:Key="Brush.Status.Success" Color="{StaticResource Color.Status.Success}" />
+    <SolidColorBrush x:Key="Brush.Status.Success.Bg" Color="{StaticResource Color.Status.Success.Bg}" />
+    <SolidColorBrush x:Key="Brush.Status.Success.Border" Color="{StaticResource Color.Status.Success.Border}" />
     <SolidColorBrush x:Key="Brush.Status.Warning" Color="{StaticResource Color.Status.Warning}" />
     <SolidColorBrush x:Key="Brush.Status.Danger" Color="{StaticResource Color.Status.Danger}" />
+    <SolidColorBrush x:Key="Brush.Status.Danger.Bg" Color="{StaticResource Color.Status.Danger.Bg}" />
+    <SolidColorBrush x:Key="Brush.Status.Danger.Border" Color="{StaticResource Color.Status.Danger.Border}" />
     <SolidColorBrush x:Key="Brush.Status.Info" Color="{StaticResource Color.Status.Info}" />
+
+    <SolidColorBrush x:Key="Brush.Tag.Blue.Bg" Color="{StaticResource Color.Tag.Blue.Bg}" />
+    <SolidColorBrush x:Key="Brush.Tag.Blue.Text" Color="{StaticResource Color.Tag.Blue.Text}" />
+    <SolidColorBrush x:Key="Brush.Tag.Slate.Bg" Color="{StaticResource Color.Tag.Slate.Bg}" />
+    <SolidColorBrush x:Key="Brush.Tag.Slate.Text" Color="{StaticResource Color.Tag.Slate.Text}" />
+    <SolidColorBrush x:Key="Brush.Tag.Purple.Bg" Color="{StaticResource Color.Tag.Purple.Bg}" />
+    <SolidColorBrush x:Key="Brush.Tag.Purple.Text" Color="{StaticResource Color.Tag.Purple.Text}" />
+    <SolidColorBrush x:Key="Brush.Tag.Dark.Bg" Color="{StaticResource Color.Tag.Dark.Bg}" />
+    <SolidColorBrush x:Key="Brush.Tag.Dark.Text" Color="{StaticResource Color.Tag.Dark.Text}" />
+
+    <SolidColorBrush x:Key="Brush.Button.Danger.Bg" Color="{StaticResource Color.Button.Danger.Bg}" />
+    <SolidColorBrush x:Key="Brush.Button.Danger.Border" Color="{StaticResource Color.Button.Danger.Border}" />
+    <SolidColorBrush x:Key="Brush.Button.Danger.Text" Color="{StaticResource Color.Button.Danger.Text}" />
 
 </ResourceDictionary>
