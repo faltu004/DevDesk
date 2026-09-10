@@ -1,7 +1,10 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using DevDesk.Core.Detection;
 using DevDesk.Core.Models;
+using DevDesk.Infrastructure.Detection;
+using DevDesk.Infrastructure.Detection.Detectors;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
 using DevDesk.Infrastructure.Persistence.Repositories;
@@ -35,7 +38,15 @@ public sealed class ProjectServiceTests : IDisposable
         context.Database.Migrate();
 
         _repository = new ProjectRepository(_contextFactory);
-        _service = new ProjectService(_repository, NullLogger<ProjectService>.Instance);
+        var detectionService = new ProjectDetectionService(
+            new IProjectDetector[]
+            {
+                new NodeProjectDetector(NullLogger<NodeProjectDetector>.Instance),
+                new DotNetProjectDetector(NullLogger<DotNetProjectDetector>.Instance),
+                new PythonProjectDetector(NullLogger<PythonProjectDetector>.Instance)
+            },
+            NullLogger<ProjectDetectionService>.Instance);
+        _service = new ProjectService(_repository, detectionService, NullLogger<ProjectService>.Instance);
     }
 
     [Fact]

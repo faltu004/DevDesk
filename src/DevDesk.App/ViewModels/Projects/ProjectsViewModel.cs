@@ -11,7 +11,7 @@ using DevDesk.Core.Services;
 namespace DevDesk.App.ViewModels.Projects;
 
 /// <summary>
-/// Root ViewModel for the Projects view coordinating project lists, search filtering, details panel, and management operations.
+/// Root ViewModel for the Projects view coordinating project lists, search filtering, auto-detection, details panel, and management operations.
 /// </summary>
 public sealed partial class ProjectsViewModel : ViewModelBase
 {
@@ -44,6 +44,9 @@ public sealed partial class ProjectsViewModel : ViewModelBase
     private string? _errorMessage;
 
     [ObservableProperty]
+    private string? _infoMessage;
+
+    [ObservableProperty]
     private ProjectPresentationModel? _selectedProject;
 
     public ObservableCollection<ProjectPresentationModel> Projects { get; } = new();
@@ -55,6 +58,8 @@ public sealed partial class ProjectsViewModel : ViewModelBase
     public bool HasProjects => Projects.Count > 0;
 
     public bool HasFilteredProjects => FilteredProjects.Count > 0;
+
+    public bool HasSelectedProject => SelectedProject is not null;
 
     public ProjectsViewModel(
         IProjectService projectService,
@@ -71,6 +76,11 @@ public sealed partial class ProjectsViewModel : ViewModelBase
     partial void OnSearchTextChanged(string value)
     {
         ApplyFilter();
+    }
+
+    partial void OnSelectedProjectChanged(ProjectPresentationModel? value)
+    {
+        OnPropertyChanged(nameof(HasSelectedProject));
     }
 
     [RelayCommand]
@@ -91,6 +101,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             IsBusy = true;
             ErrorMessage = null;
+            InfoMessage = null;
 
             var selectedPath = _dialogService.ShowFolderPicker(title: "Select Project Directory");
             if (string.IsNullOrWhiteSpace(selectedPath))
@@ -136,6 +147,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             IsBusy = true;
             ErrorMessage = null;
+            InfoMessage = null;
 
             var editVm = new AddEditProjectViewModel(target.Project);
             if (_dialogService.ShowAddEditProjectDialog(editVm))
@@ -175,6 +187,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             IsBusy = true;
             ErrorMessage = null;
+            InfoMessage = null;
 
             var confirmVm = new ConfirmDeleteViewModel(target.Name, target.Path);
             if (_dialogService.ShowConfirmDeleteDialog(confirmVm))
@@ -192,6 +205,57 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    public async Task DetectProjectAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _projectService.DetectAndApplyAsync(target.Id);
+            await LoadProjectsAsync(target.Id);
+
+            if (!result.IsRecognized)
+            {
+                InfoMessage = "DevDesk could not identify a supported project type. The project remains registered and can still be configured manually.";
+            }
+            else
+            {
+                _logger.LogInformation("Detection succeeded for project {Name}: Framework={Framework}, Language={Language}, PM={PackageManager}",
+                    target.Name, result.Framework, result.Language, result.PackageManager);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to detect project {Id}", target.Id);
+            ErrorMessage = $"Project detection failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public void DismissNotification()
+    {
+        ErrorMessage = null;
+        InfoMessage = null;
     }
 
     [RelayCommand]

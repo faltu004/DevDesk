@@ -157,16 +157,18 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Detect Project Button (Reserved for Phase 4) -->
-                <Button Style="{StaticResource Style.Button.Action}"
-                        IsEnabled="False"
-                        ToolTip="Project auto-detection will be available in Phase 4"
+                <!-- Detect Project Button (Phase 4) -->
+                <Button Command="{Binding DetectProjectCommand}"
+                        CommandParameter="{Binding SelectedProject}"
+                        IsEnabled="{Binding HasSelectedProject}"
+                        Style="{StaticResource Style.Button.Action}"
+                        ToolTip="Inspect workspace and detect project framework, language, and package manager"
                         Height="36"
                         Padding="12,0"
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Width="12" Height="12" Stretch="Uniform"
-                              Fill="{DynamicResource Brush.Text.Disabled}"
+                              Fill="{DynamicResource Brush.Text.Primary}"
                               Margin="0,0,6,0"
                               Data="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                         <TextBlock Text="Detect Project" VerticalAlignment="Center" />
@@ -185,41 +187,94 @@
             </StackPanel>
         </Grid>
 
-        <!-- ==================== 2: ERROR NOTIFICATION BANNER ==================== -->
-        <Border Grid.Row="2"
-                Background="{DynamicResource Brush.Status.Danger.Bg}"
-                BorderBrush="{DynamicResource Brush.Status.Danger.Border}"
-                BorderThickness="1"
-                CornerRadius="6"
-                Padding="14,10"
-                Margin="0,0,0,14">
-            <Border.Style>
-                <Style TargetType="{x:Type Border}">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Style="{StaticResource Style.Ellipse.StatusDot.Danger}" Margin="0,0,10,0" />
-                    <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="{DynamicResource Brush.Status.Danger}"
-                               FontSize="12.5"
-                               FontWeight="Medium" />
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- ==================== 2: NOTIFICATION BANNERS ==================== -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+            <!-- Error Banner -->
+            <Border Background="{DynamicResource Brush.Status.Danger.Bg}"
+                    BorderBrush="{DynamicResource Brush.Status.Danger.Border}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="14,10"
+                    Margin="0,0,0,8">
+                <Border.Style>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Style="{StaticResource Style.Ellipse.StatusDot.Danger}" Margin="0,0,10,0" />
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="{DynamicResource Brush.Status.Danger}"
+                                   FontSize="12.5"
+                                   FontWeight="Medium" />
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Command="{Binding DismissNotificationCommand}"
+                            Style="{StaticResource Style.Button.IconGhost}"
+                            Width="20" Height="20"
+                            Padding="0">
+                        <TextBlock Text="✕" FontSize="11" Foreground="{DynamicResource Brush.Status.Danger}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Info Notification Banner (e.g. Unrecognized project type notice) -->
+            <Border Background="{DynamicResource Brush.Background.NavActive}"
+                    BorderBrush="{DynamicResource Brush.Border.Active}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="14,10">
+                <Border.Style>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding InfoMessage}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding InfoMessage}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="16" Height="16" CornerRadius="8" Background="{DynamicResource Brush.Accent.Primary}" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <TextBlock Text="i" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0" />
+                        </Border>
+                        <TextBlock Text="{Binding InfoMessage}"
+                                   Foreground="{DynamicResource Brush.Text.Primary}"
+                                   FontSize="12.5"
+                                   FontWeight="Medium"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Command="{Binding DismissNotificationCommand}"
+                            Style="{StaticResource Style.Button.IconGhost}"
+                            Width="20" Height="20"
+                            Padding="0">
+                        <TextBlock Text="✕" FontSize="11" Foreground="{DynamicResource Brush.Text.Secondary}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Button>
+                </Grid>
+            </Border>
+        </StackPanel>
 
         <!-- ==================== 3: MAIN SPLIT WORKSPACE ==================== -->
         <Grid Grid.Row="3">
@@ -579,13 +634,15 @@
                                 <!-- Project Path -->
                                 <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="105" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="📁 Path" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" Width="105" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Path}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                    <Button Grid.Column="2"
+                                    <TextBlock Grid.Column="0" Text="📁" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Project Path" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Path}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}" Margin="8,0,8,0" VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
                                             Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding Path}"
                                             Style="{StaticResource Style.Button.IconGhost}"
@@ -598,13 +655,15 @@
                                 <!-- Run Command -->
                                 <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="105" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text=">_ Run Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" Width="105" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="{Binding RunCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                    <Button Grid.Column="2"
+                                    <TextBlock Grid.Column="0" Text=">_" FontSize="11" FontWeight="Bold" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Run Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding RunCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding RunCommandDisplay}" Margin="8,0,8,0" VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
                                             Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding RunCommand}"
                                             Style="{StaticResource Style.Button.IconGhost}"
@@ -617,13 +676,15 @@
                                 <!-- Build Command -->
                                 <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="105" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="⚙ Build Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" Width="105" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="{Binding BuildCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                    <Button Grid.Column="2"
+                                    <TextBlock Grid.Column="0" Text="⚙" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Build Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding BuildCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding BuildCommandDisplay}" Margin="8,0,8,0" VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
                                             Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding BuildCommand}"
                                             Style="{StaticResource Style.Button.IconGhost}"
@@ -636,13 +697,15 @@
                                 <!-- Test Command -->
                                 <Grid Margin="0,0,0,4">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="105" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="🧪 Test Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" Width="105" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="{Binding TestCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                    <Button Grid.Column="2"
+                                    <TextBlock Grid.Column="0" Text="🧪" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Test Command" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding TestCommandDisplay}" FontSize="11.5" FontFamily="{StaticResource FontFamily.Monospace}" Foreground="{DynamicResource Brush.Text.Primary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding TestCommandDisplay}" Margin="8,0,8,0" VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
                                             Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding TestCommand}"
                                             Style="{StaticResource Style.Button.IconGhost}"
@@ -657,21 +720,52 @@
 
                             <!-- Metadata Grid (Default Port, Framework, Package Manager, Last Opened) -->
                             <StackPanel Margin="0,0,0,14">
+                                <!-- Default Port -->
                                 <Grid Margin="0,0,0,6">
-                                    <TextBlock Text="🔀 Default Port" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" HorizontalAlignment="Left" />
-                                    <TextBlock Text="{Binding PortDisplay}" FontSize="12" FontFamily="{StaticResource FontFamily.Monospace}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" />
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="115" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="🔀" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Default Port" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding PortDisplay}" FontSize="12" FontFamily="{StaticResource FontFamily.Monospace}" FontWeight="SemiBold" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding PortDisplay}" />
                                 </Grid>
+
+                                <!-- Framework -->
                                 <Grid Margin="0,0,0,6">
-                                    <TextBlock Text="🧩 Framework" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" HorizontalAlignment="Left" />
-                                    <TextBlock Text="{Binding FrameworkDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" />
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="115" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="🧩" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Framework" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding FrameworkDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding FrameworkDisplay}" />
                                 </Grid>
+
+                                <!-- Package Manager -->
                                 <Grid Margin="0,0,0,6">
-                                    <TextBlock Text="📦 Package Manager" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" HorizontalAlignment="Left" />
-                                    <TextBlock Text="{Binding PackageManagerDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" />
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="115" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="📦" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Package Manager" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding PackageManagerDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Primary}" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding PackageManagerDisplay}" />
                                 </Grid>
+
+                                <!-- Last Opened -->
                                 <Grid Margin="0,0,0,4">
-                                    <TextBlock Text="🕒 Last Opened" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" HorizontalAlignment="Left" />
-                                    <TextBlock Text="{Binding LastOpenedDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Muted}" HorizontalAlignment="Right" />
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="22" />
+                                        <ColumnDefinition Width="115" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="🕒" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Last Opened" FontSize="12" Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding LastOpenedDisplay}" FontSize="12" Foreground="{DynamicResource Brush.Text.Muted}" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding LastOpenedDisplay}" />
                                 </Grid>
                             </StackPanel>
 

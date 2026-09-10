@@ -1,13 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using DevDesk.Core.Detection;
 using DevDesk.Core.Repositories;
+using DevDesk.Core.Services;
+using DevDesk.Infrastructure.Detection;
+using DevDesk.Infrastructure.Detection.Detectors;
 using DevDesk.Infrastructure.Persistence.Database;
 using DevDesk.Infrastructure.Persistence.Repositories;
+using DevDesk.Infrastructure.Services;
 
 namespace DevDesk.Infrastructure.Persistence;
 
 /// <summary>
-/// Extension methods for registering DevDesk persistence services into the dependency injection container.
+/// Extension methods for registering DevDesk persistence and infrastructure services into the dependency injection container.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -25,7 +30,15 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
-        services.AddSingleton<DevDesk.Core.Services.IProjectService, DevDesk.Infrastructure.Services.ProjectService>();
+
+        // Auto-detection services & detectors
+        services.AddSingleton<IProjectDetector, NodeProjectDetector>();
+        services.AddSingleton<IProjectDetector, DotNetProjectDetector>();
+        services.AddSingleton<IProjectDetector, PythonProjectDetector>();
+        services.AddSingleton<IProjectDetectionService, ProjectDetectionService>();
+
+        // Project lifecycle service
+        services.AddSingleton<IProjectService, ProjectService>();
 
         return services;
     }
