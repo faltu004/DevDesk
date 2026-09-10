@@ -26,12 +26,14 @@ public partial class App : Application
         // Persistence & Infrastructure Services
         builder.Services.AddDevDeskPersistence();
 
-        // Services & Navigation
+        // Services, Navigation & Dialogs
         builder.Services.AddSingleton<INavigationService, NavigationService>();
+        builder.Services.AddSingleton<DevDesk.App.Services.Dialogs.IDialogService, DevDesk.App.Services.Dialogs.DialogService>();
 
         // ViewModels
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
+        builder.Services.AddTransient<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
 
         // Views / Shell Window
         builder.Services.AddSingleton<MainWindow>();

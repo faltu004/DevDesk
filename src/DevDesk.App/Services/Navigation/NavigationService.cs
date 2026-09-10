@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using DevDesk.App.ViewModels.Dashboard;
+using DevDesk.App.ViewModels.Projects;
 
 namespace DevDesk.App.Services.Navigation;
 
@@ -40,12 +41,16 @@ public sealed class NavigationService : INavigationService
                 break;
 
             case NavigationItem.Projects:
+                _currentItem = NavigationItem.Projects;
+                NavigateTo<ProjectsViewModel>();
+                break;
+
             case NavigationItem.Processes:
             case NavigationItem.Ports:
             case NavigationItem.Commands:
             case NavigationItem.Settings:
                 // Reserved for subsequent phases
-                throw new NotSupportedException($"Navigation to {item} is not yet available in the foundation phase.");
+                throw new NotSupportedException($"Navigation to {item} is not yet available.");
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(item), item, "Unknown navigation item destination.");

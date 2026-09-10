@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vmDashboard="clr-namespace:DevDesk.App.ViewModels.Dashboard"
-             xmlns:vDashboard="clr-namespace:DevDesk.App.Views.Dashboard">
+             xmlns:vDashboard="clr-namespace:DevDesk.App.Views.Dashboard"
+             xmlns:vmProjects="clr-namespace:DevDesk.App.ViewModels.Projects"
+             xmlns:vProjects="clr-namespace:DevDesk.App.Views.Projects">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,6 +21,9 @@
             <!-- ViewModel to View Mappings -->
             <DataTemplate DataType="{x:Type vmDashboard:DashboardViewModel}">
                 <vDashboard:DashboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmProjects:ProjectsViewModel}">
+                <vProjects:ProjectsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

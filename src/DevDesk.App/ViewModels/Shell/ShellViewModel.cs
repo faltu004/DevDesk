@@ -39,6 +39,8 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     public bool IsDashboardSelected => CurrentItem == NavigationItem.Dashboard;
 
+    public bool IsProjectsSelected => CurrentItem == NavigationItem.Projects;
+
     [RelayCommand]
     private void Navigate(NavigationItem destination)
     {
@@ -56,10 +58,17 @@ public sealed partial class ShellViewModel : ViewModelBase
         Navigate(NavigationItem.Dashboard);
     }
 
+    [RelayCommand]
+    private void NavigateToProjects()
+    {
+        Navigate(NavigationItem.Projects);
+    }
+
     private void OnNavigationChanged()
     {
         OnPropertyChanged(nameof(CurrentViewModel));
         OnPropertyChanged(nameof(CurrentItem));
         OnPropertyChanged(nameof(IsDashboardSelected));
+        OnPropertyChanged(nameof(IsProjectsSelected));
     }
 }

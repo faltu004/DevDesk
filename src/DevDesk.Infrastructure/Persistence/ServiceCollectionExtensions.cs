@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
+        services.AddSingleton<DevDesk.Core.Services.IProjectService, DevDesk.Infrastructure.Services.ProjectService>();
 
         return services;
     }

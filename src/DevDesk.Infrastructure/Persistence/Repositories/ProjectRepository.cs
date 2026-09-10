@@ -22,10 +22,11 @@ public sealed class ProjectRepository : IProjectRepository
         await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
         var projects = await context.DeveloperProjects
             .AsNoTracking()
-            .OrderByDescending(p => p.LastOpenedAt ?? p.CreatedAt)
             .ToListAsync(cancellationToken);
 
-        return projects;
+        return projects
+            .OrderByDescending(p => p.LastOpenedAt ?? p.CreatedAt)
+            .ToList();
     }
 
     public async Task<DeveloperProject?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
