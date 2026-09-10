@@ -5,6 +5,7 @@ using DevDesk.App.Services.Navigation;
 using DevDesk.App.ViewModels.Dashboard;
 using DevDesk.App.ViewModels.Shell;
 using DevDesk.App.Views.Shell;
+using DevDesk.Infrastructure.Launchers;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
 
@@ -25,6 +26,7 @@ public partial class App : Application
 
         // Persistence & Infrastructure Services
         builder.Services.AddDevDeskPersistence();
+        builder.Services.AddDevDeskLaunchers();
 
         // Services, Navigation & Dialogs
         builder.Services.AddSingleton<INavigationService, NavigationService>();

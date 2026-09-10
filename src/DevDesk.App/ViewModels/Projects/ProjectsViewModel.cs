@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using DevDesk.App.Services.Dialogs;
 using DevDesk.App.ViewModels.Common;
+using DevDesk.Core.Launchers;
 using DevDesk.Core.Models;
 using DevDesk.Core.Services;
 
@@ -16,6 +17,7 @@ namespace DevDesk.App.ViewModels.Projects;
 public sealed partial class ProjectsViewModel : ViewModelBase
 {
     private readonly IProjectService _projectService;
+    private readonly ILauncherService _launcherService;
     private readonly IDialogService _dialogService;
     private readonly ILogger<ProjectsViewModel> _logger;
 
@@ -63,10 +65,12 @@ public sealed partial class ProjectsViewModel : ViewModelBase
 
     public ProjectsViewModel(
         IProjectService projectService,
+        ILauncherService launcherService,
         IDialogService dialogService,
         ILogger<ProjectsViewModel> logger)
     {
         _projectService = projectService;
+        _launcherService = launcherService;
         _dialogService = dialogService;
         _logger = logger;
 
@@ -244,6 +248,117 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             _logger.LogError(ex, "Failed to detect project {Id}", target.Id);
             ErrorMessage = $"Project detection failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenInVsCodeAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _launcherService.OpenInVsCodeAsync(target.Path);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error launching VS Code for project {Name}", target.Name);
+            ErrorMessage = "Failed to launch Visual Studio Code. Please check system permissions.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenInExplorerAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _launcherService.OpenInExplorerAsync(target.Path);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error opening Explorer for project {Name}", target.Name);
+            ErrorMessage = "Failed to open Windows Explorer. Please check system permissions.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenTerminalAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _launcherService.OpenTerminalAsync(target.Path);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error opening terminal for project {Name}", target.Name);
+            ErrorMessage = "Failed to open the terminal. Please check system permissions.";
         }
         finally
         {

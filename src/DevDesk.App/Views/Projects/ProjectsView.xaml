@@ -776,15 +776,17 @@
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="5" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="5" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="5" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="5" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Run (Disabled for Phase 3) -->
+                                <!-- Run (Disabled until Phase 7) -->
                                 <Button Grid.Column="0"
                                         Style="{StaticResource Style.Button.RunAction}"
                                         IsEnabled="False"
@@ -796,7 +798,7 @@
                                     </StackPanel>
                                 </Button>
 
-                                <!-- Stop (Disabled for Phase 3) -->
+                                <!-- Stop (Disabled until Phase 7) -->
                                 <Button Grid.Column="2"
                                         Style="{StaticResource Style.Button.DangerOutline}"
                                         IsEnabled="False"
@@ -808,22 +810,34 @@
                                     </StackPanel>
                                 </Button>
 
-                                <!-- VS Code (Disabled for Phase 3) -->
+                                <!-- VS Code Launcher -->
                                 <Button Grid.Column="4"
+                                        Command="{Binding DataContext.OpenInVsCodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding .}"
                                         Style="{StaticResource Style.Button.Action}"
-                                        IsEnabled="False"
-                                        ToolTip="VS Code launcher will be available in Phase 5"
+                                        ToolTip="Open project in Visual Studio Code"
                                         Height="32" Padding="0">
-                                    <TextBlock Text="VS Code" FontSize="11" Foreground="{DynamicResource Brush.Text.Disabled}" />
+                                    <TextBlock Text="VS Code" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" />
                                 </Button>
 
-                                <!-- Explorer (Disabled for Phase 3) -->
+                                <!-- Terminal Launcher -->
                                 <Button Grid.Column="6"
+                                        Command="{Binding DataContext.OpenTerminalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding .}"
                                         Style="{StaticResource Style.Button.Action}"
-                                        IsEnabled="False"
-                                        ToolTip="Explorer launcher will be available in Phase 5"
+                                        ToolTip="Open terminal at project directory"
                                         Height="32" Padding="0">
-                                    <TextBlock Text="Explorer" FontSize="11" Foreground="{DynamicResource Brush.Text.Disabled}" />
+                                    <TextBlock Text="Terminal" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" />
+                                </Button>
+
+                                <!-- Explorer Launcher -->
+                                <Button Grid.Column="8"
+                                        Command="{Binding DataContext.OpenInExplorerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding .}"
+                                        Style="{StaticResource Style.Button.Action}"
+                                        ToolTip="Open project in Windows Explorer"
+                                        Height="32" Padding="0">
+                                    <TextBlock Text="Explorer" FontSize="11" Foreground="{DynamicResource Brush.Text.Primary}" />
                                 </Button>
                             </Grid>
 
