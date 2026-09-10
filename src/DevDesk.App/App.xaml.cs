@@ -5,11 +5,13 @@ using DevDesk.App.Services.Navigation;
 using DevDesk.App.ViewModels.Dashboard;
 using DevDesk.App.ViewModels.Shell;
 using DevDesk.App.Views.Shell;
+using DevDesk.Infrastructure.Persistence;
+using DevDesk.Infrastructure.Persistence.Database;
 
 namespace DevDesk.App;
 
 /// <summary>
-/// Application entry point and composition root configuring Microsoft.Extensions.Hosting and Dependency Injection.
+/// Application entry point and composition root configuring Microsoft.Extensions.Hosting, Dependency Injection, and Persistence.
 /// </summary>
 public partial class App : Application
 {
@@ -20,6 +22,9 @@ public partial class App : Application
         base.OnStartup(e);
 
         var builder = Host.CreateApplicationBuilder(e.Args);
+
+        // Persistence & Infrastructure Services
+        builder.Services.AddDevDeskPersistence();
 
         // Services & Navigation
         builder.Services.AddSingleton<INavigationService, NavigationService>();
@@ -34,6 +39,10 @@ public partial class App : Application
         _host = builder.Build();
 
         await _host.StartAsync();
+
+        // Initialize and migrate the SQLite database safely before presenting UI
+        var databaseInitializer = _host.Services.GetRequiredService<IDatabaseInitializer>();
+        await databaseInitializer.InitializeAsync();
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
