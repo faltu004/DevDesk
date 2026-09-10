@@ -1,0 +1,50 @@
+## Build & Compilation Outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.log
+
+## Visual Studio & IDEs
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## Test Results & Code Coverage
+[Tt]est[Rr]esult*/
+[Tt]est[Rr]esults/
+[Cc]overage/
+*.coverage
+*.coveragexml
+_ReSharper*/
+
+## Local SQLite Databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Secrets & Environment Files
+.env
+.env.*
+!.env.example
+secrets.json
+
+## Windows & OS Artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp

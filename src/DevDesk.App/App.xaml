@@ -1,0 +1,25 @@
+<Application x:Class="DevDesk.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmDashboard="clr-namespace:DevDesk.App.ViewModels.Dashboard"
+             xmlns:vDashboard="clr-namespace:DevDesk.App.Views.Dashboard">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Themes -->
+                <ResourceDictionary Source="Resources/Themes/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Themes/Theme.Dark.xaml" />
+
+                <!-- Styles -->
+                <ResourceDictionary Source="Resources/Styles/Typography.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Buttons.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- ViewModel to View Mappings -->
+            <DataTemplate DataType="{x:Type vmDashboard:DashboardViewModel}">
+                <vDashboard:DashboardView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Semantic Theme References -->
+    <SolidColorBrush x:Key="Theme.Window.Background" Color="{StaticResource Color.Background.Root}" />
+    <SolidColorBrush x:Key="Theme.Sidebar.Background" Color="{StaticResource Color.Background.Sidebar}" />
+    <SolidColorBrush x:Key="Theme.Main.Background" Color="{StaticResource Color.Background.Main}" />
+    <SolidColorBrush x:Key="Theme.Card.Background" Color="{StaticResource Color.Background.Card}" />
+    <SolidColorBrush x:Key="Theme.Card.Border" Color="{StaticResource Color.Border.Subtle}" />
+
+</ResourceDictionary>
