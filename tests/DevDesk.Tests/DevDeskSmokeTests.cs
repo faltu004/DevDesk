@@ -2,10 +2,12 @@ using System.Runtime.ExceptionServices;
 using System.Windows;
 using DevDesk.App.Views.Dashboard;
 using DevDesk.App.Views.Ports;
+using DevDesk.App.Views.Processes;
 using DevDesk.App.Views.Projects;
 
 namespace DevDesk.Tests;
 
+[Collection("StaSmoke")]
 public sealed class DevDeskSmokeTests
 {
     private static readonly object AppInitLock = new();
@@ -13,6 +15,7 @@ public sealed class DevDeskSmokeTests
     [Theory]
     [InlineData(typeof(DashboardView))]
     [InlineData(typeof(ProjectsView))]
+    [InlineData(typeof(ProcessesView))]
     [InlineData(typeof(PortsView))]
     [InlineData(typeof(ProjectLogsView))]
     public void Views_InstantiateAndResolveResources_OnStaThread(Type viewType)
@@ -125,10 +128,30 @@ public sealed class DevDeskSmokeTests
         }
     }
 
+    private static readonly System.Collections.Concurrent.BlockingCollection<Action> StaQueue = new();
+    private static readonly Thread StaWorkerThread;
+
+    static DevDeskSmokeTests()
+    {
+        StaWorkerThread = new Thread(() =>
+        {
+            foreach (var item in StaQueue.GetConsumingEnumerable())
+            {
+                item();
+            }
+        })
+        {
+            IsBackground = true
+        };
+        StaWorkerThread.SetApartmentState(ApartmentState.STA);
+        StaWorkerThread.Start();
+    }
+
     private static void RunOnSta(Action action)
     {
         Exception? exception = null;
-        var thread = new Thread(() =>
+        using var done = new ManualResetEventSlim(false);
+        StaQueue.Add(() =>
         {
             try
             {
@@ -138,11 +161,13 @@ public sealed class DevDeskSmokeTests
             {
                 exception = ex;
             }
+            finally
+            {
+                done.Set();
+            }
         });
 
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
+        done.Wait();
 
         if (exception is not null)
         {

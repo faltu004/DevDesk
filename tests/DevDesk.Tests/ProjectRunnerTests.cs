@@ -781,6 +781,60 @@ public sealed class ProjectRunnerTests
         Assert.EndsWith("\"", formatted);
     }
 
+    [Fact]
+    public async Task GetManagedProcesses_HandleVerificationFails_OnRecycledPid_OmittedFromManagedSnapshot()
+    {
+        var project = CreateTestProject("dotnet run");
+        var projectService = new FakeProjectService(project);
+        var launcher = new FakeProcessLauncher();
+        var locator = new FakeRunnerToolLocator();
+
+        using var runner = new ProjectRunnerService(projectService, launcher, locator, NullLogger<ProjectRunnerService>.Instance);
+
+        var startResult = await runner.StartProjectAsync(project.Id);
+        Assert.True(startResult.Success);
+
+        var managedProc = launcher.CreatedProcesses[0];
+        
+        // Simulating PID reuse:
+        // Candidate PID exists, but handle-level verification against the Job Object fails
+        // (because the handle belongs to a different, external process).
+        managedProc.CustomContainsProcessHandle = _ => false;
+
+        var snapshot = runner.GetManagedProcesses();
+
+        // The process must be omitted because handle verification failed!
+        Assert.Empty(snapshot);
+    }
+
+    [Fact]
+    public async Task GetManagedProcesses_HandleVerificationSucceeds_ProcessEmittedAsManagedWithStartTime()
+    {
+        var project = CreateTestProject("dotnet run");
+        var projectService = new FakeProjectService(project);
+        var launcher = new FakeProcessLauncher();
+        var locator = new FakeRunnerToolLocator();
+
+        using var runner = new ProjectRunnerService(projectService, launcher, locator, NullLogger<ProjectRunnerService>.Instance);
+
+        var startResult = await runner.StartProjectAsync(project.Id);
+        Assert.True(startResult.Success);
+
+        var managedProc = launcher.CreatedProcesses[0];
+
+        // Use the current test runner process ID so Process.GetProcessById(pid) succeeds
+        managedProc.ProcessId = Environment.ProcessId;
+        managedProc.CustomContainsProcessHandle = _ => true;
+
+        var snapshot = runner.GetManagedProcesses();
+
+        Assert.Single(snapshot);
+        Assert.Equal(Environment.ProcessId, snapshot[0].ProcessId);
+        Assert.NotNull(snapshot[0].StartTimeUtc);
+        Assert.Equal(project.Id, snapshot[0].ProjectId);
+        Assert.Equal(project.Name, snapshot[0].ProjectName);
+    }
+
     private static string[] ParseWithWindowsCommandLineToArgvW(string commandLine)
     {
         if (!OperatingSystem.IsWindows())
@@ -890,7 +944,7 @@ public sealed class ProjectRunnerTests
 
     private sealed class FakeManagedProcess : IManagedProcess
     {
-        public int ProcessId { get; }
+        public int ProcessId { get; set; }
         public ProcessLaunchConfiguration Config { get; }
         public bool HasExited { get; set; }
         public int? ExitCode { get; set; }
@@ -944,6 +998,11 @@ public sealed class ProjectRunnerTests
                 Exited?.Invoke(this, ExitCode ?? 1);
             }
         }
+
+        public IReadOnlyList<int> GetActiveProcessIds() => HasExited ? Array.Empty<int>() : [ProcessId];
+
+        public Func<IntPtr, bool>? CustomContainsProcessHandle { get; set; }
+        public bool ContainsProcessHandle(IntPtr processHandle) => CustomContainsProcessHandle?.Invoke(processHandle) ?? !HasExited;
 
         public void SimulateExit(int code)
         {

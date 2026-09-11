@@ -9,6 +9,7 @@ using DevDesk.Infrastructure.Launchers;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
 using DevDesk.Infrastructure.Ports;
+using DevDesk.Infrastructure.Processes;
 using DevDesk.Infrastructure.Runner;
 
 namespace DevDesk.App;
@@ -32,6 +33,7 @@ public partial class App : Application
         builder.Services.AddDevDeskPersistence();
         builder.Services.AddDevDeskLaunchers();
         builder.Services.AddDevDeskPorts();
+        builder.Services.AddDevDeskProcesses();
         builder.Services.AddDevDeskRunner();
 
         // Services, Navigation & Dialogs
@@ -43,6 +45,21 @@ public partial class App : Application
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectLogsViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Processes.ProcessesViewModel>(sp => new DevDesk.App.ViewModels.Processes.ProcessesViewModel(
+            sp.GetRequiredService<DevDesk.Core.Processes.IProcessService>(),
+            sp.GetRequiredService<DevDesk.Core.Launchers.ILauncherService>(),
+            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DevDesk.App.ViewModels.Processes.ProcessesViewModel>>(),
+            action =>
+            {
+                if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+                {
+                    dispatcher.Invoke(action);
+                }
+                else
+                {
+                    action();
+                }
+            }));
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Ports.PortsViewModel>();
 
         // Views / Shell Window

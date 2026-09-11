@@ -400,6 +400,57 @@ internal sealed class SystemManagedProcess : IManagedProcess
         }
     }
 
+    public IReadOnlyList<int> GetActiveProcessIds()
+    {
+        if (_disposed)
+        {
+            return Array.Empty<int>();
+        }
+
+        if (_jobObject != null)
+        {
+            var jobPids = _jobObject.GetProcessIds();
+            if (jobPids.Count > 0)
+            {
+                return jobPids;
+            }
+        }
+
+        return HasExited ? Array.Empty<int>() : [_processId];
+    }
+
+    public bool ContainsProcessHandle(IntPtr processHandle)
+    {
+        if (_disposed || processHandle == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        if (_jobObject != null)
+        {
+            return _jobObject.ContainsProcessHandle(processHandle);
+        }
+
+        if (_fallbackProcess != null)
+        {
+            try
+            {
+                return !_fallbackProcess.HasExited && _fallbackProcess.Handle == processHandle;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        if (_hProcess != IntPtr.Zero)
+        {
+            return !IsRootExited() && _hProcess == processHandle;
+        }
+
+        return false;
+    }
+
     public void Dispose()
     {
         if (_disposed)

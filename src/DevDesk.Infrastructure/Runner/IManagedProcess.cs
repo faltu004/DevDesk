@@ -12,6 +12,8 @@ internal interface IManagedProcess : IDisposable
 
     Task WaitForExitAsync(CancellationToken cancellationToken = default);
     void KillEntireProcessTree();
+    IReadOnlyList<int> GetActiveProcessIds();
+    bool ContainsProcessHandle(IntPtr processHandle);
 
     event EventHandler<string>? StandardOutputReceived;
     event EventHandler<string>? StandardErrorReceived;

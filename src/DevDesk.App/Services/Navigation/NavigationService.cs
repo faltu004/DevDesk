@@ -28,6 +28,11 @@ public sealed class NavigationService : INavigationService
 
     public void NavigateTo<TViewModel>() where TViewModel : class
     {
+        if (_currentViewModel is IAsyncDeactivatable oldDeactivatable)
+        {
+            _ = SafeDeactivateAsync(oldDeactivatable);
+        }
+
         var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
         _currentViewModel = viewModel;
         CurrentViewModelChanged?.Invoke();
@@ -35,6 +40,21 @@ public sealed class NavigationService : INavigationService
         if (viewModel is IAsyncInitializable initializable)
         {
             _ = SafeInitializeAsync(initializable);
+        }
+    }
+
+    private static async Task SafeDeactivateAsync(IAsyncDeactivatable deactivatable)
+    {
+        try
+        {
+            await deactivatable.DeactivateAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error during async deactivation of {deactivatable.GetType().Name}: {ex}");
         }
     }
 
@@ -69,12 +89,16 @@ public sealed class NavigationService : INavigationService
                 NavigateTo<ProjectsViewModel>();
                 break;
 
+            case NavigationItem.Processes:
+                _currentItem = NavigationItem.Processes;
+                NavigateTo<DevDesk.App.ViewModels.Processes.ProcessesViewModel>();
+                break;
+
             case NavigationItem.Ports:
                 _currentItem = NavigationItem.Ports;
                 NavigateTo<PortsViewModel>();
                 break;
 
-            case NavigationItem.Processes:
             case NavigationItem.Commands:
             case NavigationItem.Settings:
                 // Reserved for subsequent phases

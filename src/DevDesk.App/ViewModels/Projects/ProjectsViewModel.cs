@@ -598,11 +598,20 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
 
     private void OnSessionChanged(object? sender, ProjectRunSession session)
     {
-        Application.Current?.Dispatcher?.InvokeAsync(() =>
+        void Update()
         {
             var project = Projects.FirstOrDefault(p => p.Id == session.ProjectId);
             project?.UpdateSession(session);
-        });
+        }
+
+        if (Application.Current?.Dispatcher is { } dispatcher && dispatcher.Thread.IsAlive && !dispatcher.HasShutdownStarted && !dispatcher.CheckAccess())
+        {
+            dispatcher.InvokeAsync(Update);
+        }
+        else
+        {
+            Update();
+        }
     }
 
     public void Dispose()

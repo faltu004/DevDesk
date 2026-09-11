@@ -291,9 +291,11 @@
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                          Margin="8,3,24,3"
+                                          Margin="10,3,24,3"
                                           VerticalAlignment="Center"
-                                          HorizontalAlignment="Left" />
+                                          HorizontalAlignment="Left"
+                                          TextBlock.Foreground="{DynamicResource Brush.Text.Primary}"
+                                          TextBlock.FontSize="12" />
 
                         <!-- Dropdown Popup -->
                         <Popup x:Name="PART_Popup"

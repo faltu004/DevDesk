@@ -41,6 +41,12 @@ public interface IProjectRunnerService
     IReadOnlyList<ProjectRunSession> GetActiveSessions();
 
     /// <summary>
+    /// Retrieves an authoritative immutable snapshot of all live processes currently belonging to active DevDesk sessions
+    /// (including both the root process and any descendant processes belonging to the session Job Object).
+    /// </summary>
+    IReadOnlyList<ManagedProcessIdentity> GetManagedProcesses();
+
+    /// <summary>
     /// Retrieves recent session snapshots for a project (current session + at most 2 completed sessions).
     /// </summary>
     IReadOnlyList<ProjectRunSession> GetRecentSessions(Guid projectId);

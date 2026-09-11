@@ -804,6 +804,7 @@ public sealed class ProjectLogsTests
         public Task<IReadOnlyList<ProjectStopResult>> StopAllAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public ProjectRunSession? GetSession(Guid projectId) => Sessions.TryGetValue(projectId, out var list) ? list.FirstOrDefault() : null;
         public IReadOnlyList<ProjectRunSession> GetActiveSessions() => Array.Empty<ProjectRunSession>();
+        public IReadOnlyList<ManagedProcessIdentity> GetManagedProcesses() => Array.Empty<ManagedProcessIdentity>();
         public IReadOnlyList<ProjectRunSession> GetRecentSessions(Guid projectId) => Sessions.TryGetValue(projectId, out var list) ? list : Array.Empty<ProjectRunSession>();
         public IReadOnlyList<ProcessOutputEvent> GetSessionLogs(Guid projectId, Guid sessionId) => Logs.TryGetValue(sessionId, out var list) ? list : Array.Empty<ProcessOutputEvent>();
 
@@ -872,6 +873,9 @@ public sealed class ProjectLogsTests
             HasExited = true;
             ExitCode ??= 1;
         }
+
+        public IReadOnlyList<int> GetActiveProcessIds() => HasExited ? Array.Empty<int>() : [ProcessId];
+        public bool ContainsProcessHandle(IntPtr processHandle) => !HasExited;
 
         public void SimulateExit(int code)
         {

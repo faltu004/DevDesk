@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using DevDesk.Core.Runner;
@@ -130,6 +131,58 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
             .Select(e => e.CurrentSnapshot)
             .Where(s => s.IsActive)
             .ToList();
+    }
+
+    public IReadOnlyList<ManagedProcessIdentity> GetManagedProcesses()
+    {
+        var list = new List<ManagedProcessIdentity>();
+        foreach (var entry in _activeSessions.Values)
+        {
+            var session = entry.CurrentSnapshot;
+            if (session.IsActive && !entry.Process.HasExited)
+            {
+                var pids = entry.Process.GetActiveProcessIds();
+                if (pids.Count == 0 && session.ProcessId.HasValue)
+                {
+                    pids = [session.ProcessId.Value];
+                }
+
+                foreach (var pid in pids)
+                {
+                    try
+                    {
+                        using var proc = Process.GetProcessById(pid);
+
+                        // Exact process-handle verification against the session Job Object:
+                        // Guarantees that if a process exited and Windows reassigned its PID to an
+                        // unrelated external process, the external process handle will fail IsProcessInJob
+                        // and will never be emitted as DevDesk Managed.
+                        if (!entry.Process.ContainsProcessHandle(proc.Handle))
+                        {
+                            continue;
+                        }
+
+                        DateTimeOffset startTimeUtc = new DateTimeOffset(proc.StartTime.ToUniversalTime(), TimeSpan.Zero);
+
+                        list.Add(new ManagedProcessIdentity
+                        {
+                            ProcessId = pid,
+                            ProjectId = session.ProjectId,
+                            ProjectName = session.ProjectName,
+                            SessionId = session.SessionId,
+                            IsRootProcess = session.ProcessId.HasValue && session.ProcessId.Value == pid,
+                            StartTimeUtc = startTimeUtc
+                        });
+                    }
+                    catch
+                    {
+                        // Handle acquisition, StartTime, or IsProcessInJob failed:
+                        // Conservatively omit identity; never falsely mark external process Managed.
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     public IReadOnlyList<ProjectRunSession> GetRecentSessions(Guid projectId)

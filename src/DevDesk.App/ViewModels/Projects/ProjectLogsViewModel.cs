@@ -394,7 +394,7 @@ public sealed partial class ProjectLogsViewModel : ViewModelBase, IDisposable
             }
         }
 
-        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        if (Application.Current?.Dispatcher is { } dispatcher && dispatcher.Thread.IsAlive && !dispatcher.HasShutdownStarted && !dispatcher.CheckAccess())
         {
             dispatcher.InvokeAsync(Apply);
         }
