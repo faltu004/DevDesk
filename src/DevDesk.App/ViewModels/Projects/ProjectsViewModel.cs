@@ -7,17 +7,19 @@ using DevDesk.App.Services.Dialogs;
 using DevDesk.App.ViewModels.Common;
 using DevDesk.Core.Launchers;
 using DevDesk.Core.Models;
+using DevDesk.Core.Runner;
 using DevDesk.Core.Services;
 
 namespace DevDesk.App.ViewModels.Projects;
 
 /// <summary>
-/// Root ViewModel for the Projects view coordinating project lists, search filtering, auto-detection, details panel, and management operations.
+/// Root ViewModel for the Projects view coordinating project lists, search filtering, auto-detection, details panel, management operations, and runner execution.
 /// </summary>
-public sealed partial class ProjectsViewModel : ViewModelBase
+public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
 {
     private readonly IProjectService _projectService;
     private readonly ILauncherService _launcherService;
+    private readonly IProjectRunnerService _runnerService;
     private readonly IDialogService _dialogService;
     private readonly ILogger<ProjectsViewModel> _logger;
 
@@ -66,13 +68,17 @@ public sealed partial class ProjectsViewModel : ViewModelBase
     public ProjectsViewModel(
         IProjectService projectService,
         ILauncherService launcherService,
+        IProjectRunnerService runnerService,
         IDialogService dialogService,
         ILogger<ProjectsViewModel> logger)
     {
         _projectService = projectService;
         _launcherService = launcherService;
+        _runnerService = runnerService;
         _dialogService = dialogService;
         _logger = logger;
+
+        _runnerService.SessionChanged += OnSessionChanged;
 
         _ = LoadProjectsAsync();
     }
@@ -400,6 +406,117 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    public async Task RunProjectAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _runnerService.StartProjectAsync(target.Id);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to run project {Id}", target.Id);
+            ErrorMessage = $"Failed to run project: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task StopProjectAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _runnerService.StopProjectAsync(target.Id);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to stop project {Id}", target.Id);
+            ErrorMessage = $"Failed to stop project: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task RestartProjectAsync(ProjectPresentationModel? projectModel)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var target = projectModel ?? SelectedProject;
+        if (target is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = null;
+            InfoMessage = null;
+
+            var result = await _runnerService.RestartProjectAsync(target.Id);
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to restart project {Id}", target.Id);
+            ErrorMessage = $"Failed to restart project: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task LoadProjectsAsync(Guid? selectProjectId = null)
     {
         try
@@ -414,7 +531,13 @@ public sealed partial class ProjectsViewModel : ViewModelBase
             Projects.Clear();
             foreach (var entity in entities)
             {
-                Projects.Add(new ProjectPresentationModel(entity));
+                var model = new ProjectPresentationModel(entity);
+                var existingSession = _runnerService.GetSession(entity.Id);
+                if (existingSession is not null)
+                {
+                    model.UpdateSession(existingSession);
+                }
+                Projects.Add(model);
             }
 
             OnPropertyChanged(nameof(TotalCount));
@@ -441,6 +564,20 @@ public sealed partial class ProjectsViewModel : ViewModelBase
         {
             IsLoading = false;
         }
+    }
+
+    private void OnSessionChanged(object? sender, ProjectRunSession session)
+    {
+        Application.Current?.Dispatcher?.InvokeAsync(() =>
+        {
+            var project = Projects.FirstOrDefault(p => p.Id == session.ProjectId);
+            project?.UpdateSession(session);
+        });
+    }
+
+    public void Dispose()
+    {
+        _runnerService.SessionChanged -= OnSessionChanged;
     }
 
     private void ApplyFilter()

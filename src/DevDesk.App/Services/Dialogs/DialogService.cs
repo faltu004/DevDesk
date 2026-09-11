@@ -45,6 +45,17 @@ public sealed class DialogService : IDialogService
         return dialog.ShowDialog() == true;
     }
 
+    public bool ShowConfirmShutdownDialog(int activeProjectCount)
+    {
+        var vm = new DevDesk.App.ViewModels.Shell.ConfirmShutdownViewModel(activeProjectCount);
+        var dialog = new DevDesk.App.Views.Shell.ConfirmShutdownDialog(vm)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        return dialog.ShowDialog() == true;
+    }
+
     public void ShowMessage(string title, string message)
     {
         MessageBox.Show(

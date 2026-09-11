@@ -9,6 +9,7 @@ using DevDesk.Infrastructure.Launchers;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
 using DevDesk.Infrastructure.Ports;
+using DevDesk.Infrastructure.Runner;
 
 namespace DevDesk.App;
 
@@ -18,6 +19,8 @@ namespace DevDesk.App;
 public partial class App : Application
 {
     private IHost? _host;
+
+    public static bool IsSystemSessionEnding { get; private set; }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -29,6 +32,7 @@ public partial class App : Application
         builder.Services.AddDevDeskPersistence();
         builder.Services.AddDevDeskLaunchers();
         builder.Services.AddDevDeskPorts();
+        builder.Services.AddDevDeskRunner();
 
         // Services, Navigation & Dialogs
         builder.Services.AddSingleton<INavigationService, NavigationService>();
@@ -37,7 +41,7 @@ public partial class App : Application
         // ViewModels
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
-        builder.Services.AddTransient<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Ports.PortsViewModel>();
 
         // Views / Shell Window
@@ -53,6 +57,12 @@ public partial class App : Application
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
+    }
+
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+    {
+        IsSystemSessionEnding = true;
+        base.OnSessionEnding(e);
     }
 
     protected override async void OnExit(ExitEventArgs e)

@@ -1,19 +1,74 @@
 using DevDesk.App.ViewModels.Common;
 using DevDesk.Core.Models;
+using DevDesk.Core.Runner;
 
 namespace DevDesk.App.ViewModels.Projects;
 
 /// <summary>
 /// Presentation wrapper around a DeveloperProject entity providing formatted properties for WPF data binding.
-/// Strictly presents persisted configuration without fabricated runtime state.
+/// Strictly presents persisted configuration and truthful DevDesk-owned runtime state.
 /// </summary>
 public sealed class ProjectPresentationModel : ViewModelBase
 {
     private readonly DeveloperProject _project;
+    private ProjectRunSession? _activeSession;
 
     public ProjectPresentationModel(DeveloperProject project)
     {
         _project = project ?? throw new ArgumentNullException(nameof(project));
+    }
+
+    public ProjectRunSession? ActiveSession => _activeSession;
+
+    public ProjectRunState? RunState => _activeSession?.State;
+
+    public bool HasRunState => _activeSession is not null;
+
+    public bool IsRunning => _activeSession?.State == ProjectRunState.Running;
+
+    public bool IsStarting => _activeSession?.State == ProjectRunState.Starting;
+
+    public bool IsStopping => _activeSession?.State == ProjectRunState.Stopping;
+
+    public bool IsActive => _activeSession is not null && _activeSession.IsActive;
+
+    public int? ActiveProcessId => _activeSession?.ProcessId;
+
+    public string? RunStateDisplay => _activeSession?.State switch
+    {
+        ProjectRunState.Starting => "Starting...",
+        ProjectRunState.Running => _activeSession.ProcessId.HasValue
+            ? $"Running (PID {_activeSession.ProcessId.Value})"
+            : "Running",
+        ProjectRunState.Stopping => "Stopping...",
+        ProjectRunState.Exited => _activeSession.ExitCode.HasValue
+            ? $"Exited ({_activeSession.ExitCode.Value})"
+            : "Exited",
+        ProjectRunState.Failed => "Failed",
+        _ => null
+    };
+
+    public void UpdateSession(ProjectRunSession? session)
+    {
+        // Stale session guard: prevent an older or superseded session from overwriting a newer session
+        if (session is not null && _activeSession is not null)
+        {
+            if (session.StartedAt < _activeSession.StartedAt)
+            {
+                return;
+            }
+        }
+
+        _activeSession = session;
+        OnPropertyChanged(nameof(ActiveSession));
+        OnPropertyChanged(nameof(RunState));
+        OnPropertyChanged(nameof(HasRunState));
+        OnPropertyChanged(nameof(IsRunning));
+        OnPropertyChanged(nameof(IsStarting));
+        OnPropertyChanged(nameof(IsStopping));
+        OnPropertyChanged(nameof(IsActive));
+        OnPropertyChanged(nameof(ActiveProcessId));
+        OnPropertyChanged(nameof(RunStateDisplay));
     }
 
     public DeveloperProject Project => _project;

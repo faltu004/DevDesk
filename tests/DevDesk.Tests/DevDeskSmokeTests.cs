@@ -26,6 +26,20 @@ public sealed class DevDeskSmokeTests
         });
     }
 
+    [Fact]
+    public void ConfirmShutdownDialog_InstantiatesAndResolvesResources_OnStaThread()
+    {
+        RunOnSta(() =>
+        {
+            EnsureApplicationResourcesLoaded();
+
+            var vm = new DevDesk.App.ViewModels.Shell.ConfirmShutdownViewModel(2);
+            var dialog = new DevDesk.App.Views.Shell.ConfirmShutdownDialog(vm);
+            Assert.NotNull(dialog);
+            Assert.Equal("Active Projects Running - DevDesk", dialog.Title);
+        });
+    }
+
     private static void EnsureApplicationResourcesLoaded()
     {
         lock (AppInitLock)

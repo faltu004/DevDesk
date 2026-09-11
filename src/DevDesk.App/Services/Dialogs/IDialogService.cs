@@ -23,6 +23,11 @@ public interface IDialogService
     bool ShowConfirmDeleteDialog(ConfirmDeleteViewModel viewModel);
 
     /// <summary>
+    /// Displays the application exit confirmation dialog when projects are running.
+    /// </summary>
+    bool ShowConfirmShutdownDialog(int activeProjectCount);
+
+    /// <summary>
     /// Displays an error or notification message to the user.
     /// </summary>
     void ShowMessage(string title, string message);
