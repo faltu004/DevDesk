@@ -5,6 +5,7 @@ using DevDesk.App.Services.Navigation;
 using DevDesk.App.ViewModels.Dashboard;
 using DevDesk.App.ViewModels.Shell;
 using DevDesk.App.Views.Shell;
+using DevDesk.Infrastructure.Git;
 using DevDesk.Infrastructure.Launchers;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
@@ -35,6 +36,7 @@ public partial class App : Application
         builder.Services.AddDevDeskPorts();
         builder.Services.AddDevDeskProcesses();
         builder.Services.AddDevDeskRunner();
+        builder.Services.AddDevDeskGit();
 
         // Services, Navigation & Dialogs
         builder.Services.AddSingleton<INavigationService, NavigationService>();
@@ -44,6 +46,7 @@ public partial class App : Application
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectLogsViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectGitViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Processes.ProcessesViewModel>(sp => new DevDesk.App.ViewModels.Processes.ProcessesViewModel(
             sp.GetRequiredService<DevDesk.Core.Processes.IProcessService>(),

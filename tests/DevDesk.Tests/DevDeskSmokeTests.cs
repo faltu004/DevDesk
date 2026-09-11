@@ -18,6 +18,7 @@ public sealed class DevDeskSmokeTests
     [InlineData(typeof(ProcessesView))]
     [InlineData(typeof(PortsView))]
     [InlineData(typeof(ProjectLogsView))]
+    [InlineData(typeof(ProjectGitView))]
     public void Views_InstantiateAndResolveResources_OnStaThread(Type viewType)
     {
         RunOnSta(() =>

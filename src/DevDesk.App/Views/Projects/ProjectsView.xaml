@@ -776,6 +776,30 @@
                                     </Button.Template>
                                 </Button>
 
+                                <!-- Git Tab Button -->
+                                <Button Command="{Binding SelectDetailsTabCommand}" CommandParameter="Git"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" Margin="0,0,14,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="TabBorder" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="6,6">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="TabText" Text="Git" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Secondary}" />
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsGitTabSelected}" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource Brush.Accent.Primary}" />
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                    <Setter TargetName="TabText" Property="FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
                                 <!-- Scripts (disabled) -->
                                 <Border Padding="6,6" Margin="0,0,12,0">
                                     <TextBlock Text="Scripts" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
@@ -1125,6 +1149,21 @@
                             </Style>
                         </Grid.Style>
                         <views:ProjectLogsView DataContext="{Binding LogsViewModel}" />
+                    </Grid>
+
+                    <!-- 2C: Git Content (ProjectGitView) -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsGitTabSelected}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:ProjectGitView DataContext="{Binding GitViewModel}" />
                     </Grid>
                 </Grid>
             </Grid>

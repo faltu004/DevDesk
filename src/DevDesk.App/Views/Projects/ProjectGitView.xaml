@@ -1,0 +1,582 @@
+<UserControl x:Class="DevDesk.App.Views.Projects.ProjectGitView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DevDesk.App.ViewModels.Projects"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <Grid>
+        <!-- ==================== 1. LOADING OVERLAY ==================== -->
+        <Border Background="{DynamicResource Brush.Surface.Panel}"
+                CornerRadius="8"
+                Padding="32"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsLoading}" Value="True" />
+                                <Condition Binding="{Binding IsRefreshing}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="140" Height="4" Margin="0,0,0,12" />
+                <TextBlock Text="Inspecting Git repository..."
+                           FontSize="12"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- ==================== 2. NOT A GIT REPOSITORY EMPTY STATE ==================== -->
+        <Border Padding="32"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsNotGitRepository}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <StackPanel HorizontalAlignment="Center" MaxWidth="440">
+                <!-- Git Branch Icon -->
+                <Border Width="48" Height="48"
+                        CornerRadius="24"
+                        Background="{DynamicResource Brush.Surface.Panel}"
+                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,16">
+                    <Path Width="20" Height="20"
+                          Stretch="Uniform"
+                          Fill="{DynamicResource Brush.Text.Muted}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Data="M18.8 6.2c-.4-.5-1.1-.6-1.6-.2l-3.2 2.4V4c0-.6-.4-1-1-1s-1 .4-1 1v1.1c-.6-.6-1.5-1-2.5-1C7.5 4.1 6 5.6 6 7.6c0 1.5.9 2.7 2.2 3.2v5.4c-1.3.5-2.2 1.7-2.2 3.2 0 1.9 1.5 3.5 3.5 3.5s3.5-1.6 3.5-3.5c0-1.5-.9-2.7-2.2-3.2v-5.2l3.4 2.6c.2.2.5.3.8.3.3 0 .6-.1.8-.3.5-.4.6-1.1.2-1.6l-2.2-1.7V8.6l2.8-2.1c.5-.4.6-1.1.2-1.6zM9.5 5.9c.9 0 1.7.7 1.7 1.7s-.7 1.7-1.7 1.7-1.7-.8-1.7-1.7.8-1.7 1.7-1.7zm0 15c-.9 0-1.7-.7-1.7-1.7s.7-1.7 1.7-1.7 1.7.7 1.7 1.7-.8 1.7-1.7 1.7z" />
+                </Border>
+
+                <TextBlock Text="Not a Git repository"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource Brush.Text.Primary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,6" />
+
+                <TextBlock Text="This project folder is not tracked by Git version control."
+                           FontSize="12"
+                           Foreground="{DynamicResource Brush.Text.Muted}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20" />
+
+                <!-- Action Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding OpenFolderCommand}"
+                            Style="{StaticResource Style.Button.Action}"
+                            Height="32"
+                            Padding="14,0"
+                            Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📁" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Folder" FontSize="11.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding OpenTerminalCommand}"
+                            Style="{StaticResource Style.Button.Action}"
+                            Height="32"
+                            Padding="14,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text=">_" FontFamily="{StaticResource FontFamily.Monospace}" FontSize="10" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Terminal" FontSize="11.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ==================== 3. ERROR BANNER ==================== -->
+        <Border Padding="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Border Background="{DynamicResource Brush.Surface.Panel}"
+                    BorderBrush="{DynamicResource Brush.Status.Danger}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20"
+                    MaxWidth="480">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="⚠" FontSize="16" Foreground="{DynamicResource Brush.Status.Danger}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Git Inspection Error" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource Brush.Status.Danger}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               FontSize="12"
+                               Foreground="{DynamicResource Brush.Text.Primary}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,16" />
+
+                    <Button Command="{Binding RefreshCommand}"
+                            Style="{StaticResource Style.Button.Action}"
+                            HorizontalAlignment="Left"
+                            Height="30"
+                            Padding="12,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⟳" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Retry" FontSize="11.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- ==================== 4. ACTIVE GIT REPOSITORY CONTENT ==================== -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Style>
+                <Style TargetType="{x:Type ScrollViewer}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsGitRepository}" Value="True" />
+                                <Condition Binding="{Binding HasError}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+
+            <StackPanel Margin="0,0,0,20">
+                <!-- Top Card: Repository & Topology -->
+                <Border Background="{DynamicResource Brush.Background.CardSubtle}"
+                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: Section Title + Refresh Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="REPOSITORY"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource Brush.Text.Muted}" />
+                            </StackPanel>
+
+                            <Button HorizontalAlignment="Right"
+                                    Command="{Binding RefreshCommand}"
+                                    Style="{StaticResource Style.Button.Action}"
+                                    Height="28"
+                                    Padding="10,0"
+                                    ToolTip="Refresh Git status">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⟳" FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Refresh" FontSize="11" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <!-- Row 1: Badges (Branch, Upstream, Sync Status) -->
+                        <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                            <!-- Branch Badge -->
+                            <Border Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8,5"
+                                    Margin="0,0,8,6">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Width="11" Height="11"
+                                          Stretch="Uniform"
+                                          Fill="{DynamicResource Brush.Accent.Primary}"
+                                          Margin="0,0,6,0"
+                                          VerticalAlignment="Center"
+                                          Data="M18.8 6.2c-.4-.5-1.1-.6-1.6-.2l-3.2 2.4V4c0-.6-.4-1-1-1s-1 .4-1 1v1.1c-.6-.6-1.5-1-2.5-1C7.5 4.1 6 5.6 6 7.6c0 1.5.9 2.7 2.2 3.2v5.4c-1.3.5-2.2 1.7-2.2 3.2 0 1.9 1.5 3.5 3.5 3.5s3.5-1.6 3.5-3.5c0-1.5-.9-2.7-2.2-3.2v-5.2l3.4 2.6c.2.2.5.3.8.3.3 0 .6-.1.8-.3.5-.4.6-1.1.2-1.6l-2.2-1.7V8.6l2.8-2.1c.5-.4.6-1.1.2-1.6zM9.5 5.9c.9 0 1.7.7 1.7 1.7s-.7 1.7-1.7 1.7-1.7-.8-1.7-1.7.8-1.7 1.7-1.7zm0 15c-.9 0-1.7-.7-1.7-1.7s.7-1.7 1.7-1.7 1.7.7 1.7 1.7-.8 1.7-1.7 1.7z" />
+                                    <TextBlock Text="{Binding BranchName}"
+                                               FontSize="11.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Upstream Badge -->
+                            <Border Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8,5"
+                                    Margin="0,0,8,6">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Upstream: " FontSize="11" Foreground="{DynamicResource Brush.Text.Muted}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding UpstreamDisplay}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Secondary}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Sync Status Badge (Only displayed when upstream exists) -->
+                            <Border CornerRadius="4"
+                                    Padding="8,5"
+                                    Margin="0,0,8,6"
+                                    Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1">
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasUpstream}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SyncStatusDisplay}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Accent.Primary}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+
+                        <!-- Row 2: Repository Root Path -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Root: "
+                                       FontSize="11"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,6,0" />
+
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding RepositoryRoot}"
+                                       FontFamily="{StaticResource FontFamily.Monospace}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding RepositoryRoot}"
+                                       VerticalAlignment="Center" />
+
+                            <Button Grid.Column="2"
+                                    Command="{Binding CopyToClipboardCommand}"
+                                    CommandParameter="{Binding RepositoryRoot}"
+                                    Style="{StaticResource Style.Button.IconGhost}"
+                                    Width="22" Height="22"
+                                    ToolTip="Copy Repository Root Path">
+                                <Path Width="11" Height="11" Stretch="Uniform" Fill="{DynamicResource Brush.Text.Muted}"
+                                      Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Middle Card: Working Tree Modifications -->
+                <Border Background="{DynamicResource Brush.Background.CardSubtle}"
+                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <!-- Header -->
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="WORKING TREE"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       VerticalAlignment="Center" />
+
+                            <!-- Status text -->
+                            <TextBlock HorizontalAlignment="Right"
+                                       FontSize="11"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Text" Value="Clean" />
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasWorkingTreeModifications}" Value="True">
+                                                <Setter Property="Text" Value="Uncommitted changes" />
+                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Warning}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- Stat Columns Grid -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Staged Changes -->
+                            <Border Grid.Column="0"
+                                    Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,8">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding StagedCount}"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource Brush.Text.Primary}" />
+                                    <TextBlock Text="Staged"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Modified / Unstaged -->
+                            <Border Grid.Column="2"
+                                    Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,8">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding UnstagedCount}"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource Brush.Text.Primary}" />
+                                    <TextBlock Text="Modified"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Untracked -->
+                            <Border Grid.Column="4"
+                                    Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,8">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding UntrackedCount}"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource Brush.Text.Primary}" />
+                                    <TextBlock Text="Untracked"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Conflicts -->
+                            <Border Grid.Column="6"
+                                    Background="{DynamicResource Brush.Surface.Panel}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,8">
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Subtle}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ConflictedCount, ConverterParameter=0}" Value="False">
+                                                <!-- If conflicts > 0 -->
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ConflictedCount}"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource Brush.Text.Primary}" />
+                                    <TextBlock Text="Conflicts"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bottom Card: Last Commit -->
+                <Border Background="{DynamicResource Brush.Background.CardSubtle}"
+                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Header -->
+                        <TextBlock Text="LAST COMMIT"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource Brush.Text.Muted}"
+                                   Margin="0,0,0,10" />
+
+                        <!-- When Last Commit is Available -->
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="{x:Type Grid}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasLastCommit}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Line 1: Short Hash badge + Subject -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+                                <Border Background="{DynamicResource Brush.Surface.Panel}"
+                                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                        BorderThickness="1"
+                                        CornerRadius="3"
+                                        Padding="6,2"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding LastCommit.ShortHash}"
+                                               FontFamily="{StaticResource FontFamily.Monospace}"
+                                               FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource Brush.Accent.Primary}" />
+                                </Border>
+
+                                <TextBlock Text="{Binding LastCommit.Subject}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.Text.Primary}"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Line 2: Author + Timestamp -->
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Text="{Binding LastCommit.AuthorName}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Brush.Text.Secondary}"
+                                           VerticalAlignment="Center" />
+
+                                <TextBlock Text=" • "
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           VerticalAlignment="Center" />
+
+                                <TextBlock Text="{Binding FormattedCommitTime}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- When Unborn or No Commits -->
+                        <TextBlock FontSize="12" Foreground="{DynamicResource Brush.Text.Muted}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasLastCommit}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <TextBlock.Text>
+                                <Binding Path="IsUnborn">
+                                    <Binding.TargetNullValue>No commits yet</Binding.TargetNullValue>
+                                </Binding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Actions Row -->
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding OpenFolderCommand}"
+                            Style="{StaticResource Style.Button.Action}"
+                            Height="32"
+                            Padding="14,0"
+                            Margin="0,0,10,0"
+                            ToolTip="Open repository folder in Windows Explorer">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📁" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Open in Explorer" FontSize="11.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding OpenTerminalCommand}"
+                            Style="{StaticResource Style.Button.Action}"
+                            Height="32"
+                            Padding="14,0"
+                            ToolTip="Open terminal in repository directory">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text=">_" FontFamily="{StaticResource FontFamily.Monospace}" FontSize="10" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Terminal" FontSize="11.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

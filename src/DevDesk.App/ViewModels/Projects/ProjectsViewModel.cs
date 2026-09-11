@@ -66,14 +66,17 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
     public bool HasSelectedProject => SelectedProject is not null;
 
     public ProjectLogsViewModel LogsViewModel { get; }
+    public ProjectGitViewModel GitViewModel { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOverviewTabSelected))]
     [NotifyPropertyChangedFor(nameof(IsLogsTabSelected))]
+    [NotifyPropertyChangedFor(nameof(IsGitTabSelected))]
     private string _selectedDetailsTab = "Overview";
 
     public bool IsOverviewTabSelected => SelectedDetailsTab == "Overview";
     public bool IsLogsTabSelected => SelectedDetailsTab == "Logs";
+    public bool IsGitTabSelected => SelectedDetailsTab == "Git";
 
     [RelayCommand]
     public void SelectDetailsTab(string tabName)
@@ -87,6 +90,15 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         {
             LogsViewModel.Deactivate();
         }
+
+        if (tabName == "Git")
+        {
+            GitViewModel.Activate();
+        }
+        else
+        {
+            GitViewModel.Deactivate();
+        }
     }
 
     public ProjectsViewModel(
@@ -95,6 +107,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         IProjectRunnerService runnerService,
         IDialogService dialogService,
         ProjectLogsViewModel logsViewModel,
+        ProjectGitViewModel gitViewModel,
         ILogger<ProjectsViewModel> logger)
     {
         _projectService = projectService;
@@ -102,6 +115,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         _runnerService = runnerService;
         _dialogService = dialogService;
         LogsViewModel = logsViewModel ?? throw new ArgumentNullException(nameof(logsViewModel));
+        GitViewModel = gitViewModel ?? throw new ArgumentNullException(nameof(gitViewModel));
         _logger = logger;
 
         _runnerService.SessionChanged += OnSessionChanged;
@@ -120,6 +134,11 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         if (value is not null)
         {
             LogsViewModel.SetProject(value.Id, value.ActiveSession?.SessionId);
+            GitViewModel.SetProject(value.Id, value.Path);
+        }
+        else
+        {
+            GitViewModel.SetProject(null, null);
         }
     }
 
