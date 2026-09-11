@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using DevDesk.App.ViewModels.Common;
 using DevDesk.App.ViewModels.Dashboard;
+using DevDesk.App.ViewModels.Ports;
 using DevDesk.App.ViewModels.Projects;
 
 namespace DevDesk.App.Services.Navigation;
@@ -29,6 +31,28 @@ public sealed class NavigationService : INavigationService
         var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
         _currentViewModel = viewModel;
         CurrentViewModelChanged?.Invoke();
+
+        if (viewModel is IAsyncInitializable initializable)
+        {
+            _ = SafeInitializeAsync(initializable);
+        }
+    }
+
+    private static async Task SafeInitializeAsync(IAsyncInitializable initializable)
+    {
+        try
+        {
+            await initializable.InitializeAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected cancellation
+        }
+        catch (Exception ex)
+        {
+            // Observed safely; prevents unhandled task exception from crashing dispatcher
+            System.Diagnostics.Debug.WriteLine($"Error during async initialization of {initializable.GetType().Name}: {ex}");
+        }
     }
 
     public void NavigateTo(NavigationItem item)
@@ -45,8 +69,12 @@ public sealed class NavigationService : INavigationService
                 NavigateTo<ProjectsViewModel>();
                 break;
 
-            case NavigationItem.Processes:
             case NavigationItem.Ports:
+                _currentItem = NavigationItem.Ports;
+                NavigateTo<PortsViewModel>();
+                break;
+
+            case NavigationItem.Processes:
             case NavigationItem.Commands:
             case NavigationItem.Settings:
                 // Reserved for subsequent phases

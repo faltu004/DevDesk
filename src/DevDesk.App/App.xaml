@@ -4,7 +4,9 @@
              xmlns:vmDashboard="clr-namespace:DevDesk.App.ViewModels.Dashboard"
              xmlns:vDashboard="clr-namespace:DevDesk.App.Views.Dashboard"
              xmlns:vmProjects="clr-namespace:DevDesk.App.ViewModels.Projects"
-             xmlns:vProjects="clr-namespace:DevDesk.App.Views.Projects">
+             xmlns:vProjects="clr-namespace:DevDesk.App.Views.Projects"
+             xmlns:vmPorts="clr-namespace:DevDesk.App.ViewModels.Ports"
+             xmlns:vPorts="clr-namespace:DevDesk.App.Views.Ports">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -24,6 +26,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmProjects:ProjectsViewModel}">
                 <vProjects:ProjectsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmPorts:PortsViewModel}">
+                <vPorts:PortsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

@@ -8,6 +8,7 @@ using DevDesk.App.Views.Shell;
 using DevDesk.Infrastructure.Launchers;
 using DevDesk.Infrastructure.Persistence;
 using DevDesk.Infrastructure.Persistence.Database;
+using DevDesk.Infrastructure.Ports;
 
 namespace DevDesk.App;
 
@@ -27,6 +28,7 @@ public partial class App : Application
         // Persistence & Infrastructure Services
         builder.Services.AddDevDeskPersistence();
         builder.Services.AddDevDeskLaunchers();
+        builder.Services.AddDevDeskPorts();
 
         // Services, Navigation & Dialogs
         builder.Services.AddSingleton<INavigationService, NavigationService>();
@@ -36,6 +38,7 @@ public partial class App : Application
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Ports.PortsViewModel>();
 
         // Views / Shell Window
         builder.Services.AddSingleton<MainWindow>();
