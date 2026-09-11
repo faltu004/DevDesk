@@ -65,17 +65,43 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
 
     public bool HasSelectedProject => SelectedProject is not null;
 
+    public ProjectLogsViewModel LogsViewModel { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOverviewTabSelected))]
+    [NotifyPropertyChangedFor(nameof(IsLogsTabSelected))]
+    private string _selectedDetailsTab = "Overview";
+
+    public bool IsOverviewTabSelected => SelectedDetailsTab == "Overview";
+    public bool IsLogsTabSelected => SelectedDetailsTab == "Logs";
+
+    [RelayCommand]
+    public void SelectDetailsTab(string tabName)
+    {
+        SelectedDetailsTab = tabName;
+        if (tabName == "Logs")
+        {
+            LogsViewModel.Activate();
+        }
+        else
+        {
+            LogsViewModel.Deactivate();
+        }
+    }
+
     public ProjectsViewModel(
         IProjectService projectService,
         ILauncherService launcherService,
         IProjectRunnerService runnerService,
         IDialogService dialogService,
+        ProjectLogsViewModel logsViewModel,
         ILogger<ProjectsViewModel> logger)
     {
         _projectService = projectService;
         _launcherService = launcherService;
         _runnerService = runnerService;
         _dialogService = dialogService;
+        LogsViewModel = logsViewModel ?? throw new ArgumentNullException(nameof(logsViewModel));
         _logger = logger;
 
         _runnerService.SessionChanged += OnSessionChanged;
@@ -91,6 +117,10 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
     partial void OnSelectedProjectChanged(ProjectPresentationModel? value)
     {
         OnPropertyChanged(nameof(HasSelectedProject));
+        if (value is not null)
+        {
+            LogsViewModel.SetProject(value.Id, value.ActiveSession?.SessionId);
+        }
     }
 
     [RelayCommand]
@@ -578,6 +608,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _runnerService.SessionChanged -= OnSessionChanged;
+        LogsViewModel.Dispose();
     }
 
     private void ApplyFilter()

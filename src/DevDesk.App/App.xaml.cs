@@ -41,6 +41,7 @@ public partial class App : Application
         // ViewModels
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectLogsViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Projects.ProjectsViewModel>();
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Ports.PortsViewModel>();
 

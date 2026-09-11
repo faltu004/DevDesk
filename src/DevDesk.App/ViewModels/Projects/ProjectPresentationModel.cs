@@ -41,10 +41,16 @@ public sealed class ProjectPresentationModel : ViewModelBase
             ? $"Running (PID {_activeSession.ProcessId.Value})"
             : "Running",
         ProjectRunState.Stopping => "Stopping...",
-        ProjectRunState.Exited => _activeSession.ExitCode.HasValue
-            ? $"Exited ({_activeSession.ExitCode.Value})"
-            : "Exited",
-        ProjectRunState.Failed => "Failed",
+        ProjectRunState.Exited => _activeSession.TerminationReason switch
+        {
+            ProjectTerminationReason.StoppedByDevDesk => "Stopped by DevDesk",
+            _ => _activeSession.ExitCode.HasValue
+                ? $"Exited (code {_activeSession.ExitCode.Value})"
+                : "Exited"
+        },
+        ProjectRunState.Failed => _activeSession.TerminationReason == ProjectTerminationReason.LaunchFailed
+            ? "Failed to start"
+            : "Failed",
         _ => null
     };
 

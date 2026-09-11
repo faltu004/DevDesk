@@ -17,6 +17,7 @@ public sealed record ProjectRunSession
     public DateTimeOffset? ExitedAt { get; init; }
     public int? ExitCode { get; init; }
     public string? ErrorMessage { get; init; }
+    public ProjectTerminationReason TerminationReason { get; init; } = ProjectTerminationReason.None;
 
     public bool IsActive => State == ProjectRunState.Starting || State == ProjectRunState.Running || State == ProjectRunState.Stopping;
 }

@@ -31,7 +31,7 @@ internal sealed class BoundedLogBuffer
         _maxTotalBytes = maxTotalBytes;
     }
 
-    public ProcessOutputEvent Add(Guid sessionId, Guid projectId, string rawLine, bool isError)
+    public ProcessOutputEvent Add(Guid sessionId, Guid projectId, string rawLine, bool isError, long sequenceNumber = 0)
     {
         // 1. Truncate pathological single line
         string text = rawLine;
@@ -48,6 +48,7 @@ internal sealed class BoundedLogBuffer
             ProjectId = projectId,
             Text = text,
             IsError = isError,
+            SequenceNumber = sequenceNumber,
             Timestamp = DateTimeOffset.UtcNow
         };
 

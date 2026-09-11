@@ -41,6 +41,17 @@ public interface IProjectRunnerService
     IReadOnlyList<ProjectRunSession> GetActiveSessions();
 
     /// <summary>
+    /// Retrieves recent session snapshots for a project (current session + at most 2 completed sessions).
+    /// </summary>
+    IReadOnlyList<ProjectRunSession> GetRecentSessions(Guid projectId);
+
+    /// <summary>
+    /// Retrieves a bounded log snapshot for a specific session ID belonging to a project.
+    /// Returns an immutable list of events.
+    /// </summary>
+    IReadOnlyList<ProcessOutputEvent> GetSessionLogs(Guid projectId, Guid sessionId);
+
+    /// <summary>
     /// Event fired whenever a session state transitions (Starting, Running, Stopping, Exited, Failed).
     /// Safe for non-UI consumption; UI handlers must marshal to their dispatcher.
     /// </summary>

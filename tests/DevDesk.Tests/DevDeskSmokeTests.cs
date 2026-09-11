@@ -14,6 +14,7 @@ public sealed class DevDeskSmokeTests
     [InlineData(typeof(DashboardView))]
     [InlineData(typeof(ProjectsView))]
     [InlineData(typeof(PortsView))]
+    [InlineData(typeof(ProjectLogsView))]
     public void Views_InstantiateAndResolveResources_OnStaThread(Type viewType)
     {
         RunOnSta(() =>
@@ -23,6 +24,62 @@ public sealed class DevDeskSmokeTests
             var instance = Activator.CreateInstance(viewType);
             Assert.NotNull(instance);
             Assert.IsAssignableFrom<FrameworkElement>(instance);
+        });
+    }
+
+    [Fact]
+    public void ScrollBar_Styles_VerticalAndHorizontal_HaveCorrectDimensionsAndDirection()
+    {
+        RunOnSta(() =>
+        {
+            EnsureApplicationResourcesLoaded();
+
+            var app = Application.Current;
+            var style = (Style)app.TryFindResource(typeof(System.Windows.Controls.Primitives.ScrollBar));
+            Assert.NotNull(style);
+
+            // Base setter: Width = 6
+            var widthSetter = style.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == FrameworkElement.WidthProperty);
+            Assert.NotNull(widthSetter);
+            Assert.Equal(6.0, Convert.ToDouble(widthSetter.Value));
+
+            // Triggers exist for both orientations
+            var triggers = style.Triggers.OfType<Trigger>().ToList();
+            var vTrigger = triggers.FirstOrDefault(t => t.Property == System.Windows.Controls.Primitives.ScrollBar.OrientationProperty && Equals(t.Value, System.Windows.Controls.Orientation.Vertical));
+            var hTrigger = triggers.FirstOrDefault(t => t.Property == System.Windows.Controls.Primitives.ScrollBar.OrientationProperty && Equals(t.Value, System.Windows.Controls.Orientation.Horizontal));
+
+            Assert.NotNull(vTrigger);
+            Assert.NotNull(hTrigger);
+
+            var vWidthSetter = vTrigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == FrameworkElement.WidthProperty);
+            Assert.NotNull(vWidthSetter);
+            Assert.Equal(6.0, Convert.ToDouble(vWidthSetter.Value));
+
+            var vHeightSetter = vTrigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == FrameworkElement.HeightProperty);
+            Assert.NotNull(vHeightSetter);
+            Assert.Equal(double.NaN, (double)vHeightSetter.Value);
+
+            var hHeightSetter = hTrigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == FrameworkElement.HeightProperty);
+            Assert.NotNull(hHeightSetter);
+            Assert.Equal(6.0, Convert.ToDouble(hHeightSetter.Value));
+
+            var hWidthSetter = hTrigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == FrameworkElement.WidthProperty);
+            Assert.NotNull(hWidthSetter);
+            Assert.Equal(double.NaN, (double)hWidthSetter.Value);
+        });
+    }
+
+    [Fact]
+    public void AddEditProjectDialog_InstantiatesAndResolvesResources_OnStaThread()
+    {
+        RunOnSta(() =>
+        {
+            EnsureApplicationResourcesLoaded();
+
+            var vm = new DevDesk.App.ViewModels.Projects.AddEditProjectViewModel(string.Empty);
+            var dialog = new AddEditProjectDialog(vm);
+            Assert.NotNull(dialog);
+            Assert.Equal("Add Project", vm.DialogTitle);
         });
     }
 

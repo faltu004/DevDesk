@@ -110,6 +110,9 @@ internal sealed class SystemManagedProcess : IManagedProcess
     public event EventHandler<string>? StandardErrorReceived;
     public event EventHandler<int>? Exited;
 
+    private readonly Task? _stdoutTask;
+    private readonly Task? _stderrTask;
+
     /// <summary>
     /// Native Win32 suspended-process constructor ensuring race-free Job Object assignment.
     /// </summary>
@@ -130,7 +133,7 @@ internal sealed class SystemManagedProcess : IManagedProcess
             var outStream = new FileStream(_safeOutHandle, FileAccess.Read, 4096, isAsync: false);
             _stdoutReader = new StreamReader(outStream, Encoding.UTF8);
 
-            _ = Task.Run(async () =>
+            _stdoutTask = Task.Run(async () =>
             {
                 try
                 {
@@ -152,7 +155,7 @@ internal sealed class SystemManagedProcess : IManagedProcess
             var errStream = new FileStream(_safeErrHandle, FileAccess.Read, 4096, isAsync: false);
             _stderrReader = new StreamReader(errStream, Encoding.UTF8);
 
-            _ = Task.Run(async () =>
+            _stderrTask = Task.Run(async () =>
             {
                 try
                 {
@@ -191,6 +194,22 @@ internal sealed class SystemManagedProcess : IManagedProcess
                         return;
                     }
                 }
+            }
+
+            // Final output drain: ensure pipe readers complete before firing exit event
+            try
+            {
+                using var drainCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+                var drainTasks = new List<Task>();
+                if (_stdoutTask != null) drainTasks.Add(_stdoutTask);
+                if (_stderrTask != null) drainTasks.Add(_stderrTask);
+                if (drainTasks.Count > 0)
+                {
+                    await Task.WhenAll(drainTasks).WaitAsync(drainCts.Token).ConfigureAwait(false);
+                }
+            }
+            catch
+            {
             }
 
             if (!_disposed)
@@ -318,6 +337,23 @@ internal sealed class SystemManagedProcess : IManagedProcess
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Delay(50, cancellationToken);
             }
+        }
+
+        // Drain remaining output from stdout and stderr pipes
+        try
+        {
+            using var drainCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(drainCts.Token, cancellationToken);
+            var drainTasks = new List<Task>();
+            if (_stdoutTask != null) drainTasks.Add(_stdoutTask);
+            if (_stderrTask != null) drainTasks.Add(_stderrTask);
+            if (drainTasks.Count > 0)
+            {
+                await Task.WhenAll(drainTasks).WaitAsync(linked.Token).ConfigureAwait(false);
+            }
+        }
+        catch
+        {
         }
     }
 

@@ -20,6 +20,8 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
 
     private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _projectLocks = new();
     private readonly ConcurrentDictionary<Guid, ActiveProcessEntry> _activeSessions = new();
+    private readonly ConcurrentDictionary<Guid, LinkedList<CompletedSessionRecord>> _completedSessions = new();
+    private readonly object _historyLock = new();
     private bool _disposed;
 
     public event EventHandler<ProjectRunSession>? SessionChanged;
@@ -130,6 +132,55 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
             .ToList();
     }
 
+    public IReadOnlyList<ProjectRunSession> GetRecentSessions(Guid projectId)
+    {
+        var list = new List<ProjectRunSession>();
+        if (_activeSessions.TryGetValue(projectId, out var active))
+        {
+            list.Add(active.CurrentSnapshot);
+        }
+
+        lock (_historyLock)
+        {
+            if (_completedSessions.TryGetValue(projectId, out var completed))
+            {
+                foreach (var record in completed.Reverse())
+                {
+                    if (list.All(s => s.SessionId != record.Session.SessionId))
+                    {
+                        list.Add(record.Session);
+                    }
+                }
+            }
+        }
+
+        return list;
+    }
+
+    public IReadOnlyList<ProcessOutputEvent> GetSessionLogs(Guid projectId, Guid sessionId)
+    {
+        if (_activeSessions.TryGetValue(projectId, out var active) && active.SessionId == sessionId)
+        {
+            return active.LogBuffer.GetSnapshot();
+        }
+
+        lock (_historyLock)
+        {
+            if (_completedSessions.TryGetValue(projectId, out var completed))
+            {
+                foreach (var record in completed)
+                {
+                    if (record.Session.SessionId == sessionId)
+                    {
+                        return record.LogBuffer.GetSnapshot();
+                    }
+                }
+            }
+        }
+
+        return Array.Empty<ProcessOutputEvent>();
+    }
+
     private async Task<ProjectRunResult> StartProjectInternalAsync(Guid projectId, CancellationToken cancellationToken)
     {
         // 1. Prevent duplicate starts for an already active session
@@ -207,10 +258,12 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
             var failedSnapshot = startingSnapshot with
             {
                 State = ProjectRunState.Failed,
+                TerminationReason = ProjectTerminationReason.LaunchFailed,
                 ErrorMessage = $"Failed to start process: {ex.Message}",
                 ExitedAt = DateTimeOffset.UtcNow
             };
 
+            RecordCompletedSession(project.Id, failedSnapshot, logBuffer);
             PublishSessionChange(failedSnapshot);
             return ProjectRunResult.Failed(failedSnapshot.ErrorMessage, failedSnapshot);
         }
@@ -235,13 +288,15 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         // Hook stdout/stderr output redirection
         process.StandardOutputReceived += (_, text) =>
         {
-            var evt = logBuffer.Add(sessionId, project.Id, text, isError: false);
+            long seq = entry.NextSequenceNumber();
+            var evt = logBuffer.Add(sessionId, project.Id, text, isError: false, sequenceNumber: seq);
             OutputReceived?.Invoke(this, evt);
         };
 
         process.StandardErrorReceived += (_, text) =>
         {
-            var evt = logBuffer.Add(sessionId, project.Id, text, isError: true);
+            long seq = entry.NextSequenceNumber();
+            var evt = logBuffer.Add(sessionId, project.Id, text, isError: true, sequenceNumber: seq);
             OutputReceived?.Invoke(this, evt);
         };
 
@@ -307,11 +362,12 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
             return ProjectStopResult.Failed(projectId, "Failed to terminate project process tree: operation timed out.");
         }
 
-        int exitCode = entry.Process.ExitCode ?? 0;
+        int? exitCode = entry.Process.ExitCode;
 
         var exitedSnapshot = entry.CurrentSnapshot with
         {
             State = ProjectRunState.Exited,
+            TerminationReason = ProjectTerminationReason.StoppedByDevDesk,
             ExitedAt = DateTimeOffset.UtcNow,
             ExitCode = exitCode,
             ErrorMessage = null
@@ -324,6 +380,7 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         }
 
         _activeSessions.TryRemove(projectId, out _);
+        RecordCompletedSession(projectId, exitedSnapshot, entry.LogBuffer);
         PublishSessionChange(exitedSnapshot);
 
         _logger.LogInformation("Project {ProjectId} stopped", projectId);
@@ -359,6 +416,7 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         var exitedSnapshot = entry.CurrentSnapshot with
         {
             State = ProjectRunState.Exited,
+            TerminationReason = ProjectTerminationReason.NaturalExit,
             ExitedAt = DateTimeOffset.UtcNow,
             ExitCode = exitCode
         };
@@ -367,9 +425,34 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         entry.Process.Dispose();
 
         _activeSessions.TryRemove(projectId, out _);
+        RecordCompletedSession(projectId, exitedSnapshot, entry.LogBuffer);
         PublishSessionChange(exitedSnapshot);
 
         _logger.LogInformation("Process for project {ProjectId} exited with code {Code}", projectId, exitCode);
+    }
+
+    private void RecordCompletedSession(Guid projectId, ProjectRunSession session, BoundedLogBuffer logBuffer)
+    {
+        lock (_historyLock)
+        {
+            var list = _completedSessions.GetOrAdd(projectId, _ => new LinkedList<CompletedSessionRecord>());
+            var node = list.First;
+            while (node != null)
+            {
+                if (node.Value.Session.SessionId == session.SessionId)
+                {
+                    node.Value = new CompletedSessionRecord(session, node.Value.LogBuffer);
+                    return;
+                }
+                node = node.Next;
+            }
+
+            list.AddLast(new CompletedSessionRecord(session, logBuffer));
+            while (list.Count > 2)
+            {
+                list.RemoveFirst();
+            }
+        }
     }
 
     private void PublishSessionChange(ProjectRunSession session)
@@ -404,6 +487,10 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         }
 
         _activeSessions.Clear();
+        lock (_historyLock)
+        {
+            _completedSessions.Clear();
+        }
 
         foreach (var sem in _projectLocks.Values)
         {
@@ -416,6 +503,7 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
     private sealed class ActiveProcessEntry
     {
         private int _disposedState;
+        private long _sequenceCounter;
 
         public required Guid SessionId { get; init; }
         public required Guid ProjectId { get; init; }
@@ -423,6 +511,9 @@ public sealed class ProjectRunnerService : IProjectRunnerService, IDisposable
         public required BoundedLogBuffer LogBuffer { get; init; }
         public required ProjectRunSession CurrentSnapshot { get; set; }
 
+        public long NextSequenceNumber() => Interlocked.Increment(ref _sequenceCounter);
         public bool TryMarkDisposed() => Interlocked.Exchange(ref _disposedState, 1) == 0;
     }
+
+    private sealed record CompletedSessionRecord(ProjectRunSession Session, BoundedLogBuffer LogBuffer);
 }

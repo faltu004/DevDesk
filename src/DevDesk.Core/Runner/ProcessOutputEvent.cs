@@ -10,5 +10,6 @@ public sealed record ProcessOutputEvent
     public required Guid ProjectId { get; init; }
     public required string Text { get; init; }
     public required bool IsError { get; init; }
+    public long SequenceNumber { get; init; }
     public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
 }

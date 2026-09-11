@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:DevDesk.App.ViewModels.Projects"
+             xmlns:views="clr-namespace:DevDesk.App.Views.Projects"
              d:DataContext="{d:DesignInstance Type=vm:ProjectsViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="880" d:DesignWidth="1100">
@@ -604,9 +605,9 @@
             <Border Grid.Column="2" Style="{StaticResource Style.Border.Card}" Padding="18,16">
                 <Grid>
                     <!-- Detail Content when SelectedProject is present -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <ScrollViewer.Style>
-                            <Style TargetType="{x:Type ScrollViewer}">
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
                                 <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SelectedProject}" Value="{x:Null}">
@@ -614,116 +615,197 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </ScrollViewer.Style>
+                        </Grid.Style>
 
-                        <StackPanel DataContext="{Binding SelectedProject}">
-                            <!-- Header: Icon + Name + Path -->
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <!-- Row 0: Header -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Row 1: Tab Bar -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Row 2: Selected Tab Content Area -->
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                                <!-- Icon Avatar -->
-                                <Border Grid.Column="0"
-                                        Width="40" Height="40"
-                                        CornerRadius="8"
-                                        Background="{DynamicResource Brush.Background.NavActive}"
-                                        BorderBrush="{DynamicResource Brush.Border.Medium}"
-                                        BorderThickness="1"
-                                        Margin="0,0,12,0"
-                                        VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Initials}"
+                        <!-- Row 0: Header: Icon + Name + Path with Live Status -->
+                        <Grid Grid.Row="0" DataContext="{Binding SelectedProject}" Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Avatar -->
+                            <Border Grid.Column="0"
+                                    Width="40" Height="40"
+                                    CornerRadius="8"
+                                    Background="{DynamicResource Brush.Background.NavActive}"
+                                    BorderBrush="{DynamicResource Brush.Border.Medium}"
+                                    BorderThickness="1"
+                                    Margin="0,0,12,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Initials}"
+                                           FontWeight="Bold"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource Brush.Accent.Light}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <!-- Title & Path with Live Status -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}"
+                                               Style="{StaticResource Style.Text.Title}"
+                                               FontSize="16"
                                                FontWeight="Bold"
-                                               FontSize="14"
-                                               Foreground="{DynamicResource Brush.Accent.Light}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                </Border>
-
-                                <!-- Title & Path with Live Status -->
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Name}"
-                                                   Style="{StaticResource Style.Text.Title}"
-                                                   FontSize="16"
-                                                   FontWeight="Bold"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,0,8,0" />
-                                        <Border CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="{x:Type Border}">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,0,8,0" />
+                                    <Border CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="{x:Type Border}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasRunState}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                        <Setter Property="Background" Value="#1A3326" />
+                                                        <Setter Property="BorderBrush" Value="#2E6646" />
+                                                        <Setter Property="BorderThickness" Value="1" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsStarting}" Value="True">
+                                                        <Setter Property="Background" Value="#162A43" />
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}" />
+                                                        <Setter Property="BorderThickness" Value="1" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsStopping}" Value="True">
+                                                        <Setter Property="Background" Value="#382812" />
+                                                        <Setter Property="BorderBrush" Value="#664D24" />
+                                                        <Setter Property="BorderThickness" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding RunStateDisplay}" FontSize="10.5" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasRunState}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                            <Setter Property="Background" Value="#1A3326" />
-                                                            <Setter Property="BorderBrush" Value="#2E6646" />
-                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success}" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsStarting}" Value="True">
-                                                            <Setter Property="Background" Value="#162A43" />
-                                                            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}" />
-                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.Accent.Light}" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsStopping}" Value="True">
-                                                            <Setter Property="Background" Value="#382812" />
-                                                            <Setter Property="BorderBrush" Value="#664D24" />
-                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="Foreground" Value="#FFAA33" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </Border.Style>
-                                            <TextBlock Text="{Binding RunStateDisplay}" FontSize="10.5" FontWeight="SemiBold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="{x:Type TextBlock}">
-                                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsStarting}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Accent.Light}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsStopping}" Value="True">
-                                                                <Setter Property="Foreground" Value="#FFAA33" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Path}"
-                                               Style="{StaticResource Style.Text.Caption}"
-                                               FontFamily="{StaticResource FontFamily.Monospace}"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource Brush.Text.Muted}"
-                                               TextTrimming="CharacterEllipsis"
-                                               Margin="0,2,0,0" />
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
                                 </StackPanel>
-                            </Grid>
+                                <TextBlock Text="{Binding Path}"
+                                           Style="{StaticResource Style.Text.Caption}"
+                                           FontFamily="{StaticResource FontFamily.Monospace}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Brush.Text.Muted}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
 
-                            <!-- Tab Bar (Overview / Scripts / Environment / Notes) -->
-                            <Border BorderBrush="{DynamicResource Brush.Border.Subtle}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
-                                <StackPanel Orientation="Horizontal">
-                                    <!-- Overview Tab (Active) -->
-                                    <Border BorderBrush="{DynamicResource Brush.Accent.Primary}" BorderThickness="0,0,0,2" Padding="8,6" Margin="0,0,12,0">
-                                        <TextBlock Text="Overview" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Primary}" />
-                                    </Border>
-                                    <Border Padding="8,6" Margin="0,0,12,0">
-                                        <TextBlock Text="Scripts" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                    </Border>
-                                    <Border Padding="8,6" Margin="0,0,12,0">
-                                        <TextBlock Text="Environment" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                    </Border>
-                                    <Border Padding="8,6">
-                                        <TextBlock Text="Notes" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                    </Border>
-                                </StackPanel>
-                            </Border>
+                        <!-- Row 1: Tab Bar (Overview / Logs / Scripts / Environment / Notes) -->
+                        <Border Grid.Row="1" BorderBrush="{DynamicResource Brush.Border.Subtle}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- Overview Tab Button -->
+                                <Button Command="{Binding SelectDetailsTabCommand}" CommandParameter="Overview"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" Margin="0,0,14,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="TabBorder" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="6,6">
+                                                <TextBlock x:Name="TabText" Text="Overview" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Secondary}" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsOverviewTabSelected}" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource Brush.Accent.Primary}" />
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                    <Setter TargetName="TabText" Property="FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Logs Tab Button -->
+                                <Button Command="{Binding SelectDetailsTabCommand}" CommandParameter="Logs"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" Margin="0,0,14,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="TabBorder" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="6,6">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="TabText" Text="Logs" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,0,6,0" />
+                                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource Brush.Status.Success}" VerticalAlignment="Center">
+                                                        <Ellipse.Style>
+                                                            <Style TargetType="{x:Type Ellipse}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding SelectedProject.IsRunning}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Ellipse.Style>
+                                                    </Ellipse>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsLogsTabSelected}" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource Brush.Accent.Primary}" />
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                    <Setter TargetName="TabText" Property="FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TabText" Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Scripts (disabled) -->
+                                <Border Padding="6,6" Margin="0,0,12,0">
+                                    <TextBlock Text="Scripts" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
+                                </Border>
+                                <!-- Environment (disabled) -->
+                                <Border Padding="6,6" Margin="0,0,12,0">
+                                    <TextBlock Text="Environment" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
+                                </Border>
+                                <!-- Notes (disabled) -->
+                                <Border Padding="6,6">
+                                    <TextBlock Text="Notes" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Row 2: Selected Tab Content Area -->
+                        <Grid Grid.Row="2">
+                            <!-- 2A: Overview Content (wrapped in ScrollViewer) -->
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Style>
+                                    <Style TargetType="{x:Type ScrollViewer}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOverviewTabSelected}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ScrollViewer.Style>
+                                <StackPanel DataContext="{Binding SelectedProject}">
 
                             <!-- Key Command Fields (Path, Run, Build, Test) with Copy Buttons -->
                             <StackPanel Margin="0,0,0,12">
@@ -1029,6 +1111,23 @@
                             </Grid>
                         </StackPanel>
                     </ScrollViewer>
+
+                    <!-- 2B: Logs Content (ProjectLogsView, unnested from ScrollViewer) -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLogsTabSelected}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:ProjectLogsView DataContext="{Binding LogsViewModel}" />
+                    </Grid>
+                </Grid>
+            </Grid>
 
                     <!-- Placeholder when no project is selected -->
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
