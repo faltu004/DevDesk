@@ -1,17 +1,39 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace DevDesk.App.ViewModels.Dashboard;
 
 /// <summary>
 /// Presentation model for an active project displayed on the dashboard.
 /// </summary>
-public sealed class DashboardProjectItem
+public sealed partial class DashboardProjectItem : ObservableObject
 {
-    public string Name { get; init; } = string.Empty;
-    public string Path { get; init; } = string.Empty;
-    public string FrameworkBadge { get; init; } = string.Empty;
-    public string CategoryBadge { get; init; } = string.Empty;
-    public string StatusText { get; init; } = "Stopped";
-    public bool IsRunning { get; init; }
-    public string PortText { get; init; } = "Port —";
-    public bool HasActivePort { get; init; }
-    public string IconKind { get; init; } = "Generic";
+    [ObservableProperty]
+    private Guid _id = Guid.NewGuid();
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _path = string.Empty;
+
+    [ObservableProperty]
+    private string _frameworkBadge = string.Empty;
+
+    [ObservableProperty]
+    private string _categoryBadge = string.Empty;
+
+    [ObservableProperty]
+    private string _statusText = "Stopped";
+
+    [ObservableProperty]
+    private bool _isRunning;
+
+    [ObservableProperty]
+    private string _portText = "Port —";
+
+    [ObservableProperty]
+    private bool _hasActivePort;
+
+    [ObservableProperty]
+    private string _iconKind = "Generic";
 }

@@ -5,9 +5,9 @@ namespace DevDesk.App.ViewModels.Dashboard;
 /// </summary>
 public sealed class DashboardEnvSummaryItem
 {
-    public string Title { get; init; } = string.Empty;
-    public string Value { get; init; } = string.Empty;
-    public string Subtext { get; init; } = string.Empty;
-    public string IconKind { get; init; } = string.Empty;
-    public string IconBrushKey { get; init; } = "Brush.Accent.Light";
+    public string Title { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public string Subtext { get; set; } = string.Empty;
+    public string IconKind { get; set; } = string.Empty;
+    public string IconBrushKey { get; set; } = "Brush.Accent.Light";
 }

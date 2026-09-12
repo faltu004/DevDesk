@@ -1,13 +1,27 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace DevDesk.App.ViewModels.Dashboard;
 
 /// <summary>
 /// Presentation model for a recent project item.
 /// </summary>
-public sealed class DashboardRecentProjectItem
+public sealed partial class DashboardRecentProjectItem : ObservableObject
 {
-    public string Name { get; init; } = string.Empty;
-    public string Path { get; init; } = string.Empty;
-    public string LastOpenedText { get; init; } = string.Empty;
-    public string StatusColorBrushKey { get; init; } = "Brush.Text.Muted";
-    public string IconKind { get; init; } = "Folder";
+    [ObservableProperty]
+    private Guid _id = Guid.NewGuid();
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _path = string.Empty;
+
+    [ObservableProperty]
+    private string _lastOpenedText = string.Empty;
+
+    [ObservableProperty]
+    private string _statusColorBrushKey = "Brush.Text.Muted";
+
+    [ObservableProperty]
+    private string _iconKind = "Folder";
 }
