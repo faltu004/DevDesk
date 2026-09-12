@@ -30,11 +30,11 @@
                           Data="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
                 </Border>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Active Projects Running"
+                    <TextBlock Text="{Binding Title}"
                                Style="{StaticResource Style.Text.Title}"
                                FontSize="16"
                                FontWeight="Bold" />
-                    <TextBlock Text="DevDesk is managing active project sessions."
+                    <TextBlock Text="{Binding Subtitle}"
                                Style="{StaticResource Style.Text.Caption}"
                                Foreground="{DynamicResource Brush.Text.Secondary}"
                                Margin="0,2,0,0" />

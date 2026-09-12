@@ -1,3 +1,4 @@
+using DevDesk.App.ViewModels.Commands;
 using DevDesk.App.ViewModels.Projects;
 
 namespace DevDesk.App.Services.Dialogs;
@@ -23,9 +24,19 @@ public interface IDialogService
     bool ShowConfirmDeleteDialog(ConfirmDeleteViewModel viewModel);
 
     /// <summary>
-    /// Displays the application exit confirmation dialog when projects are running.
+    /// Displays the Add / Edit Saved Command dialog window.
     /// </summary>
-    bool ShowConfirmShutdownDialog(int activeProjectCount);
+    bool ShowAddEditCommandDialog(AddEditCommandViewModel viewModel);
+
+    /// <summary>
+    /// Displays the saved command removal confirmation safety dialog.
+    /// </summary>
+    bool ShowConfirmDeleteCommandDialog(ConfirmDeleteCommandViewModel viewModel);
+
+    /// <summary>
+    /// Displays the application exit confirmation dialog when projects or saved commands are running.
+    /// </summary>
+    bool ShowConfirmShutdownDialog(int activeProjectCount, int activeCommandCount = 0);
 
     /// <summary>
     /// Displays an error or notification message to the user.

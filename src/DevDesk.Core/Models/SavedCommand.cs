@@ -1,7 +1,8 @@
 namespace DevDesk.Core.Models;
 
 /// <summary>
-/// Represents a saved execution command, either project-scoped or global.
+/// Represents a saved developer command, either project-scoped or global.
+/// Stores structured executable and argument tokens without raw shell wrapping.
 /// </summary>
 public sealed class SavedCommand
 {
@@ -14,11 +15,33 @@ public sealed class SavedCommand
 
     public string Name { get; set; } = string.Empty;
 
-    public string Command { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
-    public string WorkingDirectory { get; set; } = string.Empty;
+    /// <summary>
+    /// Executable tool name (e.g. "dotnet", "git", "npm") or absolute canonical path.
+    /// </summary>
+    public string Executable { get; set; } = string.Empty;
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    /// <summary>
+    /// Structured argument tokens preserved without shell flattening.
+    /// </summary>
+    public IReadOnlyList<string> Arguments { get; set; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Explicit working directory override, or null/empty to inherit project or fallback directory.
+    /// </summary>
+    public string? WorkingDirectory { get; set; }
+
+    /// <summary>
+    /// Optional categorization tag (e.g. "Build", "Test", "Lint", "Git").
+    /// </summary>
+    public string? Category { get; set; }
+
+    public bool IsEnabled { get; set; } = true;
+
+    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
     /// Navigation property to the parent project if project-scoped.

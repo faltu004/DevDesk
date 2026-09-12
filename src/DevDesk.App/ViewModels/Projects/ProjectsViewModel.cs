@@ -21,6 +21,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
     private readonly ILauncherService _launcherService;
     private readonly IProjectRunnerService _runnerService;
     private readonly IDialogService _dialogService;
+    private readonly DevDesk.Core.Services.ISavedCommandService? _savedCommandService;
     private readonly ILogger<ProjectsViewModel> _logger;
 
     [ObservableProperty]
@@ -108,12 +109,14 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         IDialogService dialogService,
         ProjectLogsViewModel logsViewModel,
         ProjectGitViewModel gitViewModel,
-        ILogger<ProjectsViewModel> logger)
+        ILogger<ProjectsViewModel> logger,
+        DevDesk.Core.Services.ISavedCommandService? savedCommandService = null)
     {
         _projectService = projectService;
         _launcherService = launcherService;
         _runnerService = runnerService;
         _dialogService = dialogService;
+        _savedCommandService = savedCommandService;
         LogsViewModel = logsViewModel ?? throw new ArgumentNullException(nameof(logsViewModel));
         GitViewModel = gitViewModel ?? throw new ArgumentNullException(nameof(gitViewModel));
         _logger = logger;
@@ -248,7 +251,20 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
             ErrorMessage = null;
             InfoMessage = null;
 
-            var confirmVm = new ConfirmDeleteViewModel(target.Name, target.Path);
+            int associatedCommandCount = 0;
+            if (_savedCommandService is not null)
+            {
+                try
+                {
+                    var commands = await _savedCommandService.GetProjectCommandsAsync(target.Id);
+                    associatedCommandCount = commands.Count;
+                }
+                catch
+                {
+                }
+            }
+
+            var confirmVm = new ConfirmDeleteViewModel(target.Name, target.Path, associatedCommandCount);
             if (_dialogService.ShowConfirmDeleteDialog(confirmVm))
             {
                 await _projectService.RemoveProjectAsync(target.Id);

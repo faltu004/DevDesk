@@ -1,5 +1,7 @@
 using System.Windows;
+using DevDesk.App.ViewModels.Commands;
 using DevDesk.App.ViewModels.Projects;
+using DevDesk.App.Views.Commands;
 using DevDesk.App.Views.Projects;
 
 namespace DevDesk.App.Services.Dialogs;
@@ -45,9 +47,29 @@ public sealed class DialogService : IDialogService
         return dialog.ShowDialog() == true;
     }
 
-    public bool ShowConfirmShutdownDialog(int activeProjectCount)
+    public bool ShowAddEditCommandDialog(AddEditCommandViewModel viewModel)
     {
-        var vm = new DevDesk.App.ViewModels.Shell.ConfirmShutdownViewModel(activeProjectCount);
+        var dialog = new AddEditCommandDialog(viewModel)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        return dialog.ShowDialog() == true;
+    }
+
+    public bool ShowConfirmDeleteCommandDialog(ConfirmDeleteCommandViewModel viewModel)
+    {
+        var dialog = new ConfirmDeleteCommandDialog(viewModel)
+        {
+            Owner = Application.Current?.MainWindow
+        };
+
+        return dialog.ShowDialog() == true;
+    }
+
+    public bool ShowConfirmShutdownDialog(int activeProjectCount, int activeCommandCount = 0)
+    {
+        var vm = new DevDesk.App.ViewModels.Shell.ConfirmShutdownViewModel(activeProjectCount, activeCommandCount);
         var dialog = new DevDesk.App.Views.Shell.ConfirmShutdownDialog(vm)
         {
             Owner = Application.Current?.MainWindow

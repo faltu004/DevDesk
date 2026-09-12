@@ -1,12 +1,12 @@
-<Window x:Class="DevDesk.App.Views.Projects.ConfirmDeleteDialog"
+<Window x:Class="DevDesk.App.Views.Commands.ConfirmDeleteCommandDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:DevDesk.App.ViewModels.Projects"
-        d:DataContext="{d:DesignInstance Type=vm:ConfirmDeleteViewModel}"
+        xmlns:vm="clr-namespace:DevDesk.App.ViewModels.Commands"
+        d:DataContext="{d:DesignInstance Type=vm:ConfirmDeleteCommandViewModel}"
         mc:Ignorable="d"
-        Title="Remove Project"
+        Title="Delete Command"
         Width="480"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
@@ -15,14 +15,10 @@
         Background="{DynamicResource Brush.Background.Root}"
         Foreground="{DynamicResource Brush.Text.Primary}">
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </Window.Resources>
-
     <Border Padding="24" Background="{DynamicResource Brush.Background.Card}">
         <StackPanel>
             <!-- Header with Danger Icon -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                 <Border Width="38" Height="38" CornerRadius="8"
                         Background="{DynamicResource Brush.Status.Danger.Bg}"
                         BorderBrush="{DynamicResource Brush.Status.Danger.Border}"
@@ -34,18 +30,18 @@
                           Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                 </Border>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Remove Project from DevDesk"
+                    <TextBlock Text="Delete Saved Command"
                                Style="{StaticResource Style.Text.Title}"
                                FontSize="16"
                                FontWeight="Bold" />
-                    <TextBlock Text="This removes the project record from DevDesk."
+                    <TextBlock Text="This permanently deletes the saved command definition from DevDesk."
                                Style="{StaticResource Style.Text.Caption}"
                                Foreground="{DynamicResource Brush.Text.Secondary}"
                                Margin="0,2,0,0" />
                 </StackPanel>
             </StackPanel>
 
-            <!-- Project Details Preview Box -->
+            <!-- Command Preview Box -->
             <Border Background="{DynamicResource Brush.Background.CardSubtle}"
                     BorderBrush="{DynamicResource Brush.Border.Subtle}"
                     BorderThickness="1"
@@ -53,65 +49,22 @@
                     Padding="14,12"
                     Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="{Binding ProjectName}"
+                    <TextBlock Text="{Binding CommandName}"
                                FontWeight="Bold"
                                FontSize="14"
                                Foreground="{DynamicResource Brush.Text.Primary}" />
-                    <TextBlock Text="{Binding ProjectPath}"
+                    <TextBlock Text="{Binding ExecutableAndArgs}"
                                Style="{StaticResource Style.Text.Caption}"
                                FontFamily="{StaticResource FontFamily.Monospace}"
-                               FontSize="11.5"
+                               FontSize="12"
                                Foreground="{DynamicResource Brush.Text.Muted}"
-                               Margin="0,3,0,0"
-                               TextTrimming="CharacterEllipsis" />
+                               Margin="0,4,0,0"
+                               TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 
-            <!-- Associated Commands Warning Notice -->
-            <Border Background="{DynamicResource Brush.Status.Danger.Bg}"
-                    BorderBrush="{DynamicResource Brush.Status.Danger.Border}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="12,10"
-                    Margin="0,0,0,12"
-                    Visibility="{Binding HasAssociatedCommands, Converter={StaticResource BoolToVis}}">
-                <StackPanel Orientation="Horizontal">
-                    <Path Width="14" Height="14" Stretch="Uniform"
-                          Fill="{DynamicResource Brush.Status.Danger}"
-                          Margin="0,0,10,0"
-                          VerticalAlignment="Center"
-                          Data="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-                    <TextBlock Text="{Binding AssociatedCommandsWarning}"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource Brush.Status.Danger}"
-                               VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
-
-            <!-- Explicit Safety Guarantee Notice -->
-            <Border Background="#122538"
-                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="12,10"
-                    Margin="0,0,0,22">
-                <StackPanel Orientation="Horizontal">
-                    <Path Width="14" Height="14" Stretch="Uniform"
-                          Fill="{DynamicResource Brush.Accent.Light}"
-                          Margin="0,0,10,0"
-                          VerticalAlignment="Center"
-                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                    <TextBlock Text="The project files and folders on disk will NOT be deleted."
-                               FontSize="12"
-                               FontWeight="Medium"
-                               Foreground="{DynamicResource Brush.Text.Primary}"
-                               VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
-
-            <!-- Dialog Action Buttons -->
-            <Grid>
+            <!-- Action Buttons -->
+            <Grid Margin="0,8,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -122,12 +75,12 @@
                         Content="Cancel"
                         Command="{Binding CancelCommand}"
                         Style="{StaticResource Style.Button.Action}"
-                        Margin="0,0,10,0"
+                        Margin="0,0,8,0"
                         Height="34"
                         Padding="16,0" />
 
                 <Button Grid.Column="2"
-                        Content="Remove Project"
+                        Content="Delete Command"
                         Command="{Binding ConfirmCommand}"
                         Style="{StaticResource Style.Button.DangerOutline}"
                         Height="34"

@@ -19,6 +19,7 @@ public sealed class DevDeskSmokeTests
     [InlineData(typeof(PortsView))]
     [InlineData(typeof(ProjectLogsView))]
     [InlineData(typeof(ProjectGitView))]
+    [InlineData(typeof(DevDesk.App.Views.Commands.CommandsView))]
     public void Views_InstantiateAndResolveResources_OnStaThread(Type viewType)
     {
         RunOnSta(() =>
@@ -101,7 +102,7 @@ public sealed class DevDeskSmokeTests
         });
     }
 
-    private static void EnsureApplicationResourcesLoaded()
+    internal static void EnsureApplicationResourcesLoaded()
     {
         lock (AppInitLock)
         {
@@ -148,7 +149,7 @@ public sealed class DevDeskSmokeTests
         StaWorkerThread.Start();
     }
 
-    private static void RunOnSta(Action action)
+    internal static void RunOnSta(Action action)
     {
         Exception? exception = null;
         using var done = new ManualResetEventSlim(false);

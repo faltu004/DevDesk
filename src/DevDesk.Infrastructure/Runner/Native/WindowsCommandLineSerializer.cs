@@ -11,7 +11,7 @@ namespace DevDesk.Infrastructure.Runner.Native;
 /// - Trailing backslashes at the end of a quoted argument are doubled: 2N backslashes before closing quote.
 /// - Empty arguments are represented as "".
 /// </summary>
-internal static class WindowsCommandLineSerializer
+public static class WindowsCommandLineSerializer
 {
     public static string FormatCommandLine(string executablePath, IReadOnlyList<string> arguments)
     {

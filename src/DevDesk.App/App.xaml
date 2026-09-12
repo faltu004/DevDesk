@@ -8,7 +8,9 @@
              xmlns:vmPorts="clr-namespace:DevDesk.App.ViewModels.Ports"
              xmlns:vPorts="clr-namespace:DevDesk.App.Views.Ports"
              xmlns:vmProcesses="clr-namespace:DevDesk.App.ViewModels.Processes"
-             xmlns:vProcesses="clr-namespace:DevDesk.App.Views.Processes">
+             xmlns:vProcesses="clr-namespace:DevDesk.App.Views.Processes"
+             xmlns:vmCommands="clr-namespace:DevDesk.App.ViewModels.Commands"
+             xmlns:vCommands="clr-namespace:DevDesk.App.Views.Commands">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -34,6 +36,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmPorts:PortsViewModel}">
                 <vPorts:PortsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmCommands:CommandsViewModel}">
+                <vCommands:CommandsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

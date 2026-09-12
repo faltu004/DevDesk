@@ -613,28 +613,69 @@ internal sealed class SystemProcessLauncher : IProcessLauncher
 
                     siEx.lpAttributeList = pAttributeList;
 
-                    uint creationFlags = WindowsProcessApi.CREATE_SUSPENDED
-                        | WindowsProcessApi.CREATE_NO_WINDOW
-                        | WindowsProcessApi.EXTENDED_STARTUPINFO_PRESENT;
-
-                    var saProcess = default(WindowsProcessApi.SECURITY_ATTRIBUTES);
-                    var saThread = default(WindowsProcessApi.SECURITY_ATTRIBUTES);
-
-                    created = WindowsProcessApi.CreateProcessW(
-                        null,
-                        commandLine,
-                        ref saProcess,
-                        ref saThread,
-                        bInheritHandles: true,
-                        creationFlags,
-                        IntPtr.Zero,
-                        config.WorkingDirectory,
-                        ref siEx,
-                        out pi);
-
-                    if (!created)
+                    IntPtr pEnvironment = IntPtr.Zero;
+                    if (config.EnvironmentVariables is { Count: > 0 })
                     {
-                        createProcessError = Marshal.GetLastWin32Error();
+                        var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
+                        {
+                            if (entry.Key is string k && entry.Value is string v)
+                            {
+                                envVars[k] = v;
+                            }
+                        }
+                        foreach (var kvp in config.EnvironmentVariables)
+                        {
+                            envVars[kvp.Key] = kvp.Value;
+                        }
+
+                        var sb = new StringBuilder();
+                        foreach (var kvp in envVars.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
+                        {
+                            sb.Append(kvp.Key).Append('=').Append(kvp.Value).Append('\0');
+                        }
+                        sb.Append('\0');
+
+                        pEnvironment = Marshal.StringToHGlobalUni(sb.ToString());
+                    }
+
+                    try
+                    {
+                        uint creationFlags = WindowsProcessApi.CREATE_SUSPENDED
+                            | WindowsProcessApi.CREATE_NO_WINDOW
+                            | WindowsProcessApi.EXTENDED_STARTUPINFO_PRESENT;
+
+                        if (pEnvironment != IntPtr.Zero)
+                        {
+                            creationFlags |= WindowsProcessApi.CREATE_UNICODE_ENVIRONMENT;
+                        }
+
+                        var saProcess = default(WindowsProcessApi.SECURITY_ATTRIBUTES);
+                        var saThread = default(WindowsProcessApi.SECURITY_ATTRIBUTES);
+
+                        created = WindowsProcessApi.CreateProcessW(
+                            null,
+                            commandLine,
+                            ref saProcess,
+                            ref saThread,
+                            bInheritHandles: true,
+                            creationFlags,
+                            pEnvironment,
+                            config.WorkingDirectory,
+                            ref siEx,
+                            out pi);
+
+                        if (!created)
+                        {
+                            createProcessError = Marshal.GetLastWin32Error();
+                        }
+                    }
+                    finally
+                    {
+                        if (pEnvironment != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(pEnvironment);
+                        }
                     }
                 }
                 finally
@@ -706,6 +747,14 @@ internal sealed class SystemProcessLauncher : IProcessLauncher
             StandardErrorEncoding = Encoding.UTF8,
             CreateNoWindow = true
         };
+
+        if (config.EnvironmentVariables is { Count: > 0 })
+        {
+            foreach (var kvp in config.EnvironmentVariables)
+            {
+                psi.EnvironmentVariables[kvp.Key] = kvp.Value;
+            }
+        }
 
         if (config.IsCmdShim)
         {

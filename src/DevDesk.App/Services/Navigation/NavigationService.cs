@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using DevDesk.App.ViewModels.Commands;
 using DevDesk.App.ViewModels.Common;
 using DevDesk.App.ViewModels.Dashboard;
 using DevDesk.App.ViewModels.Ports;
@@ -100,6 +101,10 @@ public sealed class NavigationService : INavigationService
                 break;
 
             case NavigationItem.Commands:
+                _currentItem = NavigationItem.Commands;
+                NavigateTo<CommandsViewModel>();
+                break;
+
             case NavigationItem.Settings:
                 // Reserved for subsequent phases
                 throw new NotSupportedException($"Navigation to {item} is not yet available.");

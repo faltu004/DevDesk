@@ -4,13 +4,14 @@ using System.Windows;
 using System.Windows.Interop;
 using DevDesk.App.Services.Dialogs;
 using DevDesk.App.ViewModels.Shell;
+using DevDesk.Core.Commands;
 using DevDesk.Core.Runner;
 
 namespace DevDesk.App.Views.Shell;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml shell window.
-/// Enforces Phase 7 application shutdown policy with active project confirmation.
+/// Enforces unified application shutdown policy confirming active project runs and running saved commands.
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -18,18 +19,21 @@ public partial class MainWindow : Window
     private const int DWMWA_CAPTION_COLOR = 35;
 
     private readonly IProjectRunnerService _runnerService;
+    private readonly ISavedCommandExecutor? _commandExecutor;
     private readonly IDialogService _dialogService;
     private bool _isShutdownConfirmed;
 
     public MainWindow(
         ShellViewModel viewModel,
         IProjectRunnerService runnerService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        ISavedCommandExecutor? commandExecutor = null)
     {
         InitializeComponent();
         DataContext = viewModel;
         _runnerService = runnerService;
         _dialogService = dialogService;
+        _commandExecutor = commandExecutor;
     }
 
     protected override async void OnClosing(CancelEventArgs e)
@@ -47,8 +51,9 @@ public partial class MainWindow : Window
             return;
         }
 
-        var activeSessions = _runnerService.GetActiveSessions();
-        if (activeSessions.Count == 0)
+        var activeProjects = _runnerService.GetActiveSessions();
+        var activeCommands = _commandExecutor?.GetActiveSessions() ?? Array.Empty<SavedCommandRunSession>();
+        if (activeProjects.Count == 0 && activeCommands.Count == 0)
         {
             base.OnClosing(e);
             return;
@@ -57,13 +62,18 @@ public partial class MainWindow : Window
         // Cancel initial close to prompt user confirmation
         e.Cancel = true;
 
-        bool confirmed = _dialogService.ShowConfirmShutdownDialog(activeSessions.Count);
+        bool confirmed = _dialogService.ShowConfirmShutdownDialog(activeProjects.Count, activeCommands.Count);
         if (confirmed)
         {
             _isShutdownConfirmed = true;
             try
             {
-                await _runnerService.StopAllAsync();
+                var stopTasks = new List<Task> { _runnerService.StopAllAsync() };
+                if (_commandExecutor is not null)
+                {
+                    stopTasks.Add(_commandExecutor.StopAllAsync());
+                }
+                await Task.WhenAll(stopTasks);
             }
             catch
             {

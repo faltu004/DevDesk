@@ -328,4 +328,101 @@
         </Setter>
     </Style>
 
+    <!-- Dark Theme RadioButton Style -->
+    <Style x:Key="Style.RadioButton.Dark" TargetType="{x:Type RadioButton}">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid Width="16" Height="16" VerticalAlignment="Center">
+                            <Border x:Name="OuterCircle"
+                                    Width="16" Height="16"
+                                    CornerRadius="8"
+                                    Background="{DynamicResource Brush.Background.Input}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True" />
+                            <Ellipse x:Name="InnerDot"
+                                     Width="8" Height="8"
+                                     Fill="{DynamicResource Brush.Accent.Light}"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Visibility="Collapsed" />
+                        </Grid>
+                        <ContentPresenter Margin="8,0,0,0"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="OuterCircle" Property="BorderBrush" Value="{DynamicResource Brush.Border.Medium}" />
+                            <Setter TargetName="OuterCircle" Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="OuterCircle" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}" />
+                            <Setter TargetName="InnerDot" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark Theme CheckBox Style -->
+    <Style x:Key="Style.CheckBox.Dark" TargetType="{x:Type CheckBox}">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid Width="16" Height="16" VerticalAlignment="Center">
+                            <Border x:Name="CheckBorder"
+                                    Width="16" Height="16"
+                                    CornerRadius="4"
+                                    Background="{DynamicResource Brush.Background.Input}"
+                                    BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                    BorderThickness="1"
+                                    SnapsToDevicePixels="True" />
+                            <Path x:Name="CheckMark"
+                                  Data="M 3 8 L 6 11 L 13 4"
+                                  Stroke="{DynamicResource Brush.Accent.Light}"
+                                  StrokeThickness="2"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Visibility="Collapsed" />
+                        </Grid>
+                        <ContentPresenter Margin="8,0,0,0"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource Brush.Border.Medium}" />
+                            <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource Brush.Background.CardHover}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource Brush.Border.Active}" />
+                            <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource Brush.Background.CardSubtle}" />
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -171,7 +171,8 @@ public sealed class PersistenceTests : IDisposable
             {
                 ProjectId = project.Id,
                 Name = "Project Task",
-                Command = "dotnet run",
+                Executable = "dotnet",
+                Arguments = new[] { "run" },
                 WorkingDirectory = project.Path
             };
 
@@ -179,7 +180,8 @@ public sealed class PersistenceTests : IDisposable
             {
                 ProjectId = null,
                 Name = "Global Task",
-                Command = "git status",
+                Executable = "git",
+                Arguments = new[] { "status" },
                 WorkingDirectory = @"C:\"
             };
 

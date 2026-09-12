@@ -29,6 +29,7 @@ internal sealed record ProcessLaunchConfiguration
     public required string ExecutablePath { get; init; }
     public required IReadOnlyList<string> Arguments { get; init; }
     public bool IsCmdShim { get; init; }
+    public IReadOnlyDictionary<string, string>? EnvironmentVariables { get; init; }
 }
 
 /// <summary>
