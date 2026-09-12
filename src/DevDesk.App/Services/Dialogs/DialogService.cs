@@ -78,6 +78,33 @@ public sealed class DialogService : IDialogService
         return dialog.ShowDialog() == true;
     }
 
+    public string? ShowFilePicker(string? filter = null, string? title = null)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = title ?? "Select Executable",
+            Filter = filter ?? "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*",
+            Multiselect = false,
+            CheckFileExists = true
+        };
+
+        return dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.FileName)
+            ? dialog.FileName
+            : null;
+    }
+
+    public bool ShowConfirmationDialog(string title, string message, string confirmButtonText = "Confirm")
+    {
+        var result = MessageBox.Show(
+            Application.Current?.MainWindow ?? null!,
+            message,
+            title,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        return result == MessageBoxResult.Yes;
+    }
+
     public void ShowMessage(string title, string message)
     {
         MessageBox.Show(

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using DevDesk.App.ViewModels.Common;
 using DevDesk.Core.Launchers;
 using DevDesk.Core.Processes;
+using DevDesk.Core.Settings;
 
 namespace DevDesk.App.ViewModels.Processes;
 
@@ -35,6 +36,7 @@ public sealed partial class ProcessesViewModel : ViewModelBase, IAsyncInitializa
     private readonly ILauncherService _launcherService;
     private readonly ILogger<ProcessesViewModel> _logger;
     private readonly Action<Action>? _uiDispatcher;
+    private readonly DevDesk.Core.Settings.ISettingsService? _settingsService;
 
     [ObservableProperty]
     private string _title = "Processes";
@@ -97,11 +99,22 @@ public sealed partial class ProcessesViewModel : ViewModelBase, IAsyncInitializa
         ILauncherService launcherService,
         ILogger<ProcessesViewModel> logger,
         Action<Action>? uiDispatcher = null)
+        : this(processService, launcherService, logger, uiDispatcher, null)
+    {
+    }
+
+    public ProcessesViewModel(
+        IProcessService processService,
+        ILauncherService launcherService,
+        ILogger<ProcessesViewModel> logger,
+        Action<Action>? uiDispatcher,
+        DevDesk.Core.Settings.ISettingsService? settingsService)
     {
         _processService = processService ?? throw new ArgumentNullException(nameof(processService));
         _launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _uiDispatcher = uiDispatcher;
+        _settingsService = settingsService;
     }
 
     public async Task InitializeAsync()
@@ -149,7 +162,8 @@ public sealed partial class ProcessesViewModel : ViewModelBase, IAsyncInitializa
 
     private async Task RunPollingLoopAsync(long generation, CancellationToken ct)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1500));
+        var interval = _settingsService?.GetCurrentSettings().MonitorRefreshInterval.ToTimeSpan() ?? TimeSpan.FromMilliseconds(1500);
+        using var timer = new PeriodicTimer(interval);
         try
         {
             while (!ct.IsCancellationRequested && await timer.WaitForNextTickAsync(ct))

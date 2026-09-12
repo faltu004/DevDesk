@@ -154,6 +154,8 @@ public sealed class SavedCommandsTests : IDisposable
         }
 
         public void ShowMessage(string title, string message) { }
+        public string? ShowFilePicker(string? filter = null, string? title = null) => null;
+        public bool ShowConfirmationDialog(string title, string message, string confirmButtonText = "Confirm") => true;
     }
 
     // =============================================================================================

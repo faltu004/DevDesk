@@ -533,6 +533,10 @@ public sealed class DashboardActionsTests
         public bool ShowAddEditCommandDialog(DevDesk.App.ViewModels.Commands.AddEditCommandViewModel viewModel) => true;
         public bool ShowConfirmDeleteCommandDialog(DevDesk.App.ViewModels.Commands.ConfirmDeleteCommandViewModel viewModel) => true;
         public bool ShowConfirmShutdownDialog(int activeProjectCount, int activeCommandCount = 0) => true;
+        public string? FilePickerResult { get; set; }
+        public string? ShowFilePicker(string? filter = null, string? title = null) => FilePickerResult;
+        public bool ConfirmationResult { get; set; } = true;
+        public bool ShowConfirmationDialog(string title, string message, string confirmButtonText = "Confirm") => ConfirmationResult;
         public void ShowMessage(string title, string message) { }
     }
 

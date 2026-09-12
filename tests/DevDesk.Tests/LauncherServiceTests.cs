@@ -369,5 +369,6 @@ public sealed class LauncherServiceTests : IDisposable
         public string? FindVsCodeExecutable() => VsCodePath;
         public string? FindExplorerExecutable() => ExplorerPath;
         public TerminalLaunchTarget? FindPreferredTerminal() => PreferredTerminal;
+        public TerminalLaunchTarget? FindPreferredTerminal(DevDesk.Core.Settings.PreferredTerminal preference) => PreferredTerminal;
     }
 }

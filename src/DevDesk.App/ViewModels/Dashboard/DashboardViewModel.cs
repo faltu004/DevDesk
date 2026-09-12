@@ -11,6 +11,7 @@ using DevDesk.Core.Launchers;
 using DevDesk.Core.Models;
 using DevDesk.Core.Runner;
 using DevDesk.Core.Services;
+using DevDesk.Core.Settings;
 using DevDesk.Core.SystemMonitor;
 
 namespace DevDesk.App.ViewModels.Dashboard;
@@ -29,6 +30,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
     private readonly IProjectRunnerService? _runnerService;
     private readonly IDialogService? _dialogService;
     private readonly ProjectsViewModel? _projectsViewModel;
+    private readonly ISettingsService? _settingsService;
     private readonly Action<Action>? _uiDispatcher;
 
     [ObservableProperty]
@@ -136,7 +138,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
         ISystemMonitorService systemMonitorService,
         ILogger<DashboardViewModel> logger,
         Action<Action>? uiDispatcher = null)
-        : this(systemMonitorService, logger, null, null, null, null, null, null, uiDispatcher)
+        : this(systemMonitorService, logger, null, null, null, null, null, null, null, uiDispatcher)
     {
     }
 
@@ -149,6 +151,21 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
         IProjectRunnerService? runnerService,
         IDialogService? dialogService,
         ProjectsViewModel? projectsViewModel,
+        Action<Action>? uiDispatcher)
+        : this(systemMonitorService, logger, navigationService, projectService, launcherService, runnerService, dialogService, projectsViewModel, null, uiDispatcher)
+    {
+    }
+
+    public DashboardViewModel(
+        ISystemMonitorService systemMonitorService,
+        ILogger<DashboardViewModel> logger,
+        INavigationService? navigationService,
+        IProjectService? projectService,
+        ILauncherService? launcherService,
+        IProjectRunnerService? runnerService,
+        IDialogService? dialogService,
+        ProjectsViewModel? projectsViewModel,
+        ISettingsService? settingsService = null,
         Action<Action>? uiDispatcher = null)
     {
         _systemMonitorService = systemMonitorService ?? throw new ArgumentNullException(nameof(systemMonitorService));
@@ -159,6 +176,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
         _runnerService = runnerService;
         _dialogService = dialogService;
         _projectsViewModel = projectsViewModel;
+        _settingsService = settingsService;
         _uiDispatcher = uiDispatcher ?? (Action<Action>)(action =>
         {
             if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
@@ -321,7 +339,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
 
     private async Task RunPollingLoopAsync(long generation, CancellationToken ct)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1500));
+        var interval = _settingsService?.GetCurrentSettings().MonitorRefreshInterval.ToTimeSpan() ?? TimeSpan.FromMilliseconds(1500);
+        using var timer = new PeriodicTimer(interval);
         try
         {
             while (!ct.IsCancellationRequested && await timer.WaitForNextTickAsync(ct))

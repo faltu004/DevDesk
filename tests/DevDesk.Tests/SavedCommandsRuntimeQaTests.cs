@@ -462,5 +462,7 @@ public sealed class SavedCommandsRuntimeQaTests : IDisposable
         public bool ShowConfirmShutdownDialog(int activeProjectCount, int activeCommandCount = 0) => true;
         public string? ShowFolderPicker(string? initialDirectory = null, string? title = null) => null;
         public void ShowMessage(string title, string message) { }
+        public string? ShowFilePicker(string? filter = null, string? title = null) => null;
+        public bool ShowConfirmationDialog(string title, string message, string confirmButtonText = "Confirm") => true;
     }
 }

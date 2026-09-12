@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Logging;
 using DevDesk.Core.Common;
 using DevDesk.Core.Launchers;
+using DevDesk.Core.Settings;
 
 namespace DevDesk.Infrastructure.Launchers;
 
@@ -14,16 +15,19 @@ public sealed class LauncherService : ILauncherService
 {
     private readonly IExternalToolLocator _toolLocator;
     private readonly IProcessRunner _processRunner;
+    private readonly ISettingsService? _settingsService;
     private readonly ILogger<LauncherService> _logger;
 
     internal LauncherService(
         IExternalToolLocator toolLocator,
         IProcessRunner processRunner,
-        ILogger<LauncherService> logger)
+        ILogger<LauncherService> logger,
+        ISettingsService? settingsService = null)
     {
         _toolLocator = toolLocator;
         _processRunner = processRunner;
         _logger = logger;
+        _settingsService = settingsService;
     }
 
     public Task<LaunchResult> OpenInVsCodeAsync(string projectPath, CancellationToken cancellationToken = default)
@@ -38,7 +42,25 @@ public sealed class LauncherService : ILauncherService
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var vsCodePath = _toolLocator.FindVsCodeExecutable();
+        string? vsCodePath = null;
+        var settings = _settingsService?.GetCurrentSettings();
+        if (!string.IsNullOrWhiteSpace(settings?.VsCodeExecutableOverride))
+        {
+            if (ExecutablePathValidator.TryValidate(settings.VsCodeExecutableOverride, out var validatedPath, out _))
+            {
+                vsCodePath = validatedPath;
+            }
+            else
+            {
+                _logger.LogWarning("Configured VS Code executable override '{Path}' is invalid or missing; falling back to auto-detection", settings.VsCodeExecutableOverride);
+            }
+        }
+
+        if (string.IsNullOrEmpty(vsCodePath))
+        {
+            vsCodePath = _toolLocator.FindVsCodeExecutable();
+        }
+
         if (string.IsNullOrEmpty(vsCodePath))
         {
             _logger.LogInformation("VS Code launch requested, but Code.exe was not found on this system");
@@ -155,10 +177,12 @@ public sealed class LauncherService : ILauncherService
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var terminalTarget = _toolLocator.FindPreferredTerminal();
+        var settings = _settingsService?.GetCurrentSettings();
+        var preferred = settings?.PreferredTerminal ?? PreferredTerminal.Auto;
+        var terminalTarget = _toolLocator.FindPreferredTerminal(preferred);
         if (terminalTarget is null || string.IsNullOrEmpty(terminalTarget.ExecutablePath))
         {
-            _logger.LogWarning("No supported terminal (Windows Terminal, PowerShell) found on this system");
+            _logger.LogWarning("No supported terminal (Windows Terminal, PowerShell, Command Prompt) found on this system");
             return Task.FromResult(LaunchResult.Failed(
                 LaunchFailureReason.ApplicationNotFound,
                 "No supported terminal (Windows Terminal, PowerShell) could be found on this computer."));
@@ -188,6 +212,10 @@ public sealed class LauncherService : ILauncherService
             case TerminalType.WindowsPowerShell:
                 // Clean startup banner; interactive shell in working directory
                 startInfo.ArgumentList.Add("-NoLogo");
+                break;
+
+            case TerminalType.CommandPrompt:
+                // Opens interactive cmd.exe in the project directory with no extra arguments
                 break;
 
             default:

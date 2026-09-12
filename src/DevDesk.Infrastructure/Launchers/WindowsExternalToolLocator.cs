@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.Extensions.Logging;
+using DevDesk.Core.Settings;
 
 namespace DevDesk.Infrastructure.Launchers;
 
@@ -126,29 +127,57 @@ internal sealed class WindowsExternalToolLocator : IExternalToolLocator
         return null;
     }
 
-    public TerminalLaunchTarget? FindPreferredTerminal()
+    public TerminalLaunchTarget? FindPreferredTerminal(PreferredTerminal preference = PreferredTerminal.Auto)
     {
         try
         {
-            // 1. Windows Terminal (wt.exe)
-            var wtPath = FindWindowsTerminal();
-            if (!string.IsNullOrEmpty(wtPath))
+            // If an explicit preference was requested, probe it first
+            switch (preference)
             {
-                return new TerminalLaunchTarget(wtPath, TerminalType.WindowsTerminal);
+                case PreferredTerminal.WindowsTerminal:
+                    var wt = FindWindowsTerminal();
+                    if (!string.IsNullOrEmpty(wt)) { return new TerminalLaunchTarget(wt, TerminalType.WindowsTerminal); }
+                    break;
+
+                case PreferredTerminal.PowerShell7:
+                    var pwsh = FindPowerShell7();
+                    if (!string.IsNullOrEmpty(pwsh)) { return new TerminalLaunchTarget(pwsh, TerminalType.PowerShell7); }
+                    break;
+
+                case PreferredTerminal.WindowsPowerShell:
+                    var ps = FindWindowsPowerShell();
+                    if (!string.IsNullOrEmpty(ps)) { return new TerminalLaunchTarget(ps, TerminalType.WindowsPowerShell); }
+                    break;
+
+                case PreferredTerminal.CommandPrompt:
+                    var cmd = FindCommandPrompt();
+                    if (!string.IsNullOrEmpty(cmd)) { return new TerminalLaunchTarget(cmd, TerminalType.CommandPrompt); }
+                    break;
             }
 
-            // 2. PowerShell 7 (pwsh.exe)
-            var pwshPath = FindPowerShell7();
-            if (!string.IsNullOrEmpty(pwshPath))
+            // Safe fallback sequence if preferred was not found or if Auto was selected
+            var wtFallback = FindWindowsTerminal();
+            if (!string.IsNullOrEmpty(wtFallback))
             {
-                return new TerminalLaunchTarget(pwshPath, TerminalType.PowerShell7);
+                return new TerminalLaunchTarget(wtFallback, TerminalType.WindowsTerminal);
             }
 
-            // 3. Windows PowerShell fallback (powershell.exe)
-            var psPath = FindWindowsPowerShell();
-            if (!string.IsNullOrEmpty(psPath))
+            var pwshFallback = FindPowerShell7();
+            if (!string.IsNullOrEmpty(pwshFallback))
             {
-                return new TerminalLaunchTarget(psPath, TerminalType.WindowsPowerShell);
+                return new TerminalLaunchTarget(pwshFallback, TerminalType.PowerShell7);
+            }
+
+            var psFallback = FindWindowsPowerShell();
+            if (!string.IsNullOrEmpty(psFallback))
+            {
+                return new TerminalLaunchTarget(psFallback, TerminalType.WindowsPowerShell);
+            }
+
+            var cmdFallback = FindCommandPrompt();
+            if (!string.IsNullOrEmpty(cmdFallback))
+            {
+                return new TerminalLaunchTarget(cmdFallback, TerminalType.CommandPrompt);
             }
         }
         catch (Exception ex)
@@ -157,6 +186,21 @@ internal sealed class WindowsExternalToolLocator : IExternalToolLocator
         }
 
         return null;
+    }
+
+    private static string? FindCommandPrompt()
+    {
+        var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        if (!string.IsNullOrEmpty(winDir))
+        {
+            var cmdPath = Path.Combine(winDir, "System32", "cmd.exe");
+            if (File.Exists(cmdPath))
+            {
+                return Path.GetFullPath(cmdPath);
+            }
+        }
+
+        return FindOnPath("cmd.exe");
     }
 
     private static string? FindWindowsTerminal()

@@ -1,0 +1,563 @@
+<UserControl x:Class="DevDesk.App.Views.Settings.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:DevDesk.App.ViewModels.Settings"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+             mc:Ignorable="d"
+             d:DesignHeight="880" d:DesignWidth="1100">
+
+    <Grid Margin="30,24,30,28">
+        <Grid.RowDefinitions>
+            <!-- 0: Header -->
+            <RowDefinition Height="Auto" />
+            <!-- 1: Spacing -->
+            <RowDefinition Height="20" />
+            <!-- 2: Main Content Layout -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ==================== 0: HEADER SECTION ==================== -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Title & Subtitle -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           Style="{StaticResource Style.Text.Header}"
+                           FontSize="27"
+                           FontWeight="Bold" />
+                <TextBlock Text="{Binding Subtitle}"
+                           Style="{StaticResource Style.Text.Subtitle}"
+                           FontSize="13"
+                           Foreground="{DynamicResource Brush.Text.Secondary}"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Save Changes & Dirty Indicator in Header -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Status Message Banner -->
+                <TextBlock Text="{Binding StatusMessage}"
+                           FontSize="12"
+                           FontWeight="Medium"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Accent.Light}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Danger}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsStatusSuccess}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Brush.Status.Success}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Button Content="Save Changes"
+                        Command="{Binding SaveSettingsCommand}"
+                        Style="{StaticResource Style.Button.Primary}"
+                        Height="34"
+                        Padding="16,0"
+                        IsEnabled="{Binding CanSave}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ==================== 2: THREE-COLUMN SETTINGS LAYOUT ==================== -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <!-- Left: Category List (180px) -->
+                <ColumnDefinition Width="180" />
+                <!-- Spacing -->
+                <ColumnDefinition Width="16" />
+                <!-- Center: Active Category Settings Form (Flexible) -->
+                <ColumnDefinition Width="*" />
+                <!-- Spacing -->
+                <ColumnDefinition Width="16" />
+                <!-- Right: Application Status & Tools Info Panel (280px) -->
+                <ColumnDefinition Width="280" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ==================== LEFT: CATEGORY NAVIGATION ==================== -->
+            <Border Grid.Column="0"
+                    Style="{StaticResource Style.Border.Card}"
+                    Padding="6,8"
+                    VerticalAlignment="Top">
+                <ItemsControl ItemsSource="{Binding Categories}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:SettingsCategoryItem}">
+                            <RadioButton IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                         Command="{Binding DataContext.SelectCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         CommandParameter="{Binding}"
+                                         Style="{StaticResource Style.Button.Nav}"
+                                         Height="38"
+                                         Margin="0,2"
+                                         Padding="10,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Width="15" Height="15" Stretch="Uniform"
+                                          Data="{Binding IconData}"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                          Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding Title}"
+                                               VerticalAlignment="Center"
+                                               FontSize="13"
+                                               FontWeight="Medium"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+                                </StackPanel>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <!-- ==================== CENTER: SETTINGS CARDS ==================== -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,0,10,0">
+
+                    <!-- SECTION: GENERAL -->
+                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="General"
+                                       Style="{StaticResource Style.Text.Title}"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="Basic appearance and visual configuration for DevDesk."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       Margin="0,0,0,16" />
+
+                            <!-- Theme Selection (Read-Only per Phase 13 Spec) -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Theme"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="13" />
+                                    <TextBlock Text="DevDesk currently features a native professional dark theme."
+                                               Style="{StaticResource Style.Text.Caption}"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+                                <Border Grid.Column="1"
+                                        Background="{DynamicResource Brush.Background.CardSubtle}"
+                                        BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="12,6"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ThemeDisplay}"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontWeight="Medium"
+                                               FontSize="12" />
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: EDITORS & TERMINALS -->
+                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Editors &amp; Terminals"
+                                       Style="{StaticResource Style.Text.Title}"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="Configure external development launchers and tools."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       Margin="0,0,0,16" />
+
+                            <!-- VS Code Override -->
+                            <TextBlock Text="VS Code Executable"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontSize="13"
+                                       Margin="0,0,0,2" />
+                            <TextBlock Text="Override auto-detected Code.exe path. Leave empty to use system PATH or standard install locations."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       Margin="0,0,0,8" />
+
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding VsCodeExecutableOverride, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource Brush.Background.Input}"
+                                         Foreground="{DynamicResource Brush.Text.Primary}"
+                                         BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                         BorderThickness="1"
+                                         Padding="10,7"
+                                         FontSize="12"
+                                         FontFamily="{StaticResource FontFamily.Monospace}"
+                                         VerticalContentAlignment="Center" />
+
+                                <Button Grid.Column="1"
+                                        Content="Browse..."
+                                        Command="{Binding BrowseVsCodePathCommand}"
+                                        Style="{StaticResource Style.Button.Action}"
+                                        Margin="8,0,0,0"
+                                        Height="32"
+                                        Padding="12,0" />
+
+                                <Button Grid.Column="2"
+                                        Content="Reset"
+                                        Command="{Binding ResetVsCodeOverrideCommand}"
+                                        Style="{StaticResource Style.Button.Action}"
+                                        Margin="6,0,0,0"
+                                        Height="32"
+                                        Padding="12,0"
+                                        ToolTip="Clear override and use automatic detection" />
+                            </Grid>
+
+                            <!-- Path Validation Warning -->
+                            <Border Background="{DynamicResource Brush.Status.Danger.Bg}"
+                                    BorderBrush="{DynamicResource Brush.Status.Danger.Border}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,6"
+                                    Margin="0,4,0,12">
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasVsCodePathError}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding VsCodePathErrorMessage}"
+                                           Foreground="{DynamicResource Brush.Status.Danger}"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap" />
+                            </Border>
+
+                            <Separator Style="{StaticResource Style.Separator.Subtle}" Margin="0,8,0,14" />
+
+                            <!-- Preferred Terminal -->
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="200" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Preferred Terminal"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="13" />
+                                    <TextBlock Text="Preferred shell for opening project terminals. Safely falls back if chosen terminal is not installed."
+                                               Style="{StaticResource Style.Text.Caption}"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               Margin="0,2,10,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding TerminalOptions}"
+                                          SelectedItem="{Binding SelectedTerminalOption}"
+                                          DisplayMemberPath="DisplayName"
+                                          Style="{StaticResource Style.ComboBox.Dark}"
+                                          Height="32"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: MONITORING -->
+                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Monitoring"
+                                       Style="{StaticResource Style.Text.Title}"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="Telemetry polling cadence for real-time background monitors."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       Margin="0,0,0,16" />
+
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="200" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Live Refresh Interval"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="13" />
+                                    <TextBlock Text="Used by Dashboard System Monitor and Process Manager while active. Ports is non-polling."
+                                               Style="{StaticResource Style.Text.Caption}"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               Margin="0,2,10,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding RefreshIntervalOptions}"
+                                          SelectedItem="{Binding SelectedRefreshIntervalOption}"
+                                          DisplayMemberPath="DisplayName"
+                                          Style="{StaticResource Style.ComboBox.Dark}"
+                                          Height="32"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- SECTION: DATA & ABOUT -->
+                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Data &amp; Preferences"
+                                       Style="{StaticResource Style.Text.Title}"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="Manage local database storage and reset preferences."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       Margin="0,0,0,16" />
+
+                            <!-- Database Path (Read-Only) -->
+                            <TextBlock Text="Database Location"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontSize="13"
+                                       Margin="0,0,0,2" />
+                            <TextBlock Text="Local SQLite database storing projects, saved commands, and app preferences."
+                                       Style="{StaticResource Style.Text.Caption}"
+                                       Foreground="{DynamicResource Brush.Text.Muted}"
+                                       Margin="0,0,0,6" />
+
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding DatabasePath, Mode=OneWay}"
+                                         IsReadOnly="True"
+                                         Background="{DynamicResource Brush.Background.CardSubtle}"
+                                         Foreground="{DynamicResource Brush.Text.Secondary}"
+                                         BorderBrush="{DynamicResource Brush.Border.Subtle}"
+                                         BorderThickness="1"
+                                         Padding="10,7"
+                                         FontSize="12"
+                                         FontFamily="{StaticResource FontFamily.Monospace}"
+                                         VerticalContentAlignment="Center" />
+
+                                <Button Grid.Column="1"
+                                        Content="Open Data Folder"
+                                        Command="{Binding OpenDataFolderCommand}"
+                                        Style="{StaticResource Style.Button.Action}"
+                                        Margin="8,0,0,0"
+                                        Height="32"
+                                        Padding="12,0" />
+                            </Grid>
+
+                            <Separator Style="{StaticResource Style.Separator.Subtle}" Margin="0,4,0,14" />
+
+                            <!-- Reset Settings Button -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Reset Settings to Defaults"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.Text.Primary}"
+                                               FontSize="13" />
+                                    <TextBlock Text="Resets editor, terminal, and polling preferences. Will NOT delete projects or saved commands."
+                                               Style="{StaticResource Style.Text.Caption}"
+                                               Foreground="{DynamicResource Brush.Text.Muted}"
+                                               Margin="0,2,10,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Content="Reset Defaults"
+                                        Command="{Binding ResetToDefaultsCommand}"
+                                        Style="{StaticResource Style.Button.DangerOutline}"
+                                        Height="32"
+                                        Padding="12,0"
+                                        VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== RIGHT: SYSTEM ABOUT & STATUS PANEL ==================== -->
+            <StackPanel Grid.Column="4">
+                <!-- Application Status Card -->
+                <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="System Environment"
+                                   Style="{StaticResource Style.Text.Title}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,12" />
+
+                        <!-- DevDesk Version -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="DevDesk Version"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DevDeskVersion}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                        <!-- Platform -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Platform"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding PlatformDisplay}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"
+                                       ToolTip="{Binding PlatformDisplay}" />
+                        </Grid>
+
+                        <!-- Database Status -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Database"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DatabaseHealthStatus}"
+                                       Foreground="{DynamicResource Brush.Status.Success}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                        <!-- Git Version -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Git"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding GitStatusDisplay}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                        <!-- Node Version -->
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Node.js"
+                                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding NodeStatusDisplay}"
+                                       Foreground="{DynamicResource Brush.Text.Primary}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Diagnostics & Tools Card -->
+                <Border Style="{StaticResource Style.Border.Card}">
+                    <StackPanel>
+                        <TextBlock Text="Diagnostics &amp; Tools"
+                                   Style="{StaticResource Style.Text.Title}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="Utility actions for local troubleshooting."
+                                   Style="{StaticResource Style.Text.Caption}"
+                                   Foreground="{DynamicResource Brush.Text.Secondary}"
+                                   Margin="0,0,0,14" />
+
+                        <Button Content="Open Data Folder"
+                                Command="{Binding OpenDataFolderCommand}"
+                                Style="{StaticResource Style.Button.Action}"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,0,0,8"
+                                Height="32" />
+
+                        <Button Content="Run System Diagnostics"
+                                Command="{Binding RunDiagnosticsCommand}"
+                                Style="{StaticResource Style.Button.Action}"
+                                HorizontalAlignment="Stretch"
+                                Height="32" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

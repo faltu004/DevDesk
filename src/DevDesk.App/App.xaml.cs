@@ -67,8 +67,10 @@ public partial class App : Application
                 {
                     action();
                 }
-            }));
+            },
+            sp.GetService<DevDesk.Core.Settings.ISettingsService>()));
         builder.Services.AddSingleton<DevDesk.App.ViewModels.Ports.PortsViewModel>();
+        builder.Services.AddSingleton<DevDesk.App.ViewModels.Settings.SettingsViewModel>();
 
         // Views / Shell Window
         builder.Services.AddSingleton<MainWindow>();

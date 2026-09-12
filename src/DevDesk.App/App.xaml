@@ -10,7 +10,9 @@
              xmlns:vmProcesses="clr-namespace:DevDesk.App.ViewModels.Processes"
              xmlns:vProcesses="clr-namespace:DevDesk.App.Views.Processes"
              xmlns:vmCommands="clr-namespace:DevDesk.App.ViewModels.Commands"
-             xmlns:vCommands="clr-namespace:DevDesk.App.Views.Commands">
+             xmlns:vCommands="clr-namespace:DevDesk.App.Views.Commands"
+             xmlns:vmSettings="clr-namespace:DevDesk.App.ViewModels.Settings"
+             xmlns:vSettings="clr-namespace:DevDesk.App.Views.Settings">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -39,6 +41,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmCommands:CommandsViewModel}">
                 <vCommands:CommandsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmSettings:SettingsViewModel}">
+                <vSettings:SettingsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

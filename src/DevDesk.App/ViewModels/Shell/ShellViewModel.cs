@@ -37,15 +37,41 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     public NavigationItem CurrentItem => _navigationService.CurrentItem;
 
-    public bool IsDashboardSelected => CurrentItem == NavigationItem.Dashboard;
+    public bool IsDashboardSelected
+    {
+        get => CurrentItem == NavigationItem.Dashboard;
+        set { if (value) NavigateToDashboard(); }
+    }
 
-    public bool IsProjectsSelected => CurrentItem == NavigationItem.Projects;
+    public bool IsProjectsSelected
+    {
+        get => CurrentItem == NavigationItem.Projects;
+        set { if (value) NavigateToProjects(); }
+    }
 
-    public bool IsProcessesSelected => CurrentItem == NavigationItem.Processes;
+    public bool IsProcessesSelected
+    {
+        get => CurrentItem == NavigationItem.Processes;
+        set { if (value) NavigateToProcesses(); }
+    }
 
-    public bool IsPortsSelected => CurrentItem == NavigationItem.Ports;
+    public bool IsPortsSelected
+    {
+        get => CurrentItem == NavigationItem.Ports;
+        set { if (value) NavigateToPorts(); }
+    }
 
-    public bool IsCommandsSelected => CurrentItem == NavigationItem.Commands;
+    public bool IsCommandsSelected
+    {
+        get => CurrentItem == NavigationItem.Commands;
+        set { if (value) NavigateToCommands(); }
+    }
+
+    public bool IsSettingsSelected
+    {
+        get => CurrentItem == NavigationItem.Settings;
+        set { if (value) NavigateToSettings(); }
+    }
 
     [RelayCommand]
     private void Navigate(NavigationItem destination)
@@ -88,6 +114,12 @@ public sealed partial class ShellViewModel : ViewModelBase
         Navigate(NavigationItem.Commands);
     }
 
+    [RelayCommand]
+    private void NavigateToSettings()
+    {
+        Navigate(NavigationItem.Settings);
+    }
+
     private void OnNavigationChanged()
     {
         OnPropertyChanged(nameof(CurrentViewModel));
@@ -97,5 +129,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsProcessesSelected));
         OnPropertyChanged(nameof(IsPortsSelected));
         OnPropertyChanged(nameof(IsCommandsSelected));
+        OnPropertyChanged(nameof(IsSettingsSelected));
     }
 }

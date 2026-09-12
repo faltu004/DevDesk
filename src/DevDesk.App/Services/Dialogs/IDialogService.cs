@@ -39,6 +39,16 @@ public interface IDialogService
     bool ShowConfirmShutdownDialog(int activeProjectCount, int activeCommandCount = 0);
 
     /// <summary>
+    /// Displays a file picker dialog to select an executable file.
+    /// </summary>
+    string? ShowFilePicker(string? filter = null, string? title = null);
+
+    /// <summary>
+    /// Displays a confirmation dialog returning true if confirmed.
+    /// </summary>
+    bool ShowConfirmationDialog(string title, string message, string confirmButtonText = "Confirm");
+
+    /// <summary>
     /// Displays an error or notification message to the user.
     /// </summary>
     void ShowMessage(string title, string message);

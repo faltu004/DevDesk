@@ -88,7 +88,7 @@
                 <StackPanel Grid.Row="2" Margin="0,4,0,0">
                     <!-- Dashboard Nav (Active) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsChecked="{Binding IsDashboardSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsDashboardSelected, Mode=TwoWay}"
                                  Command="{Binding NavigateToDashboardCommand}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
@@ -101,7 +101,7 @@
 
                     <!-- Projects Nav (Active Phase 3) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsChecked="{Binding IsProjectsSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsProjectsSelected, Mode=TwoWay}"
                                  Command="{Binding NavigateToProjectsCommand}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
@@ -114,7 +114,7 @@
 
                     <!-- Processes Nav (Active Phase 9) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsChecked="{Binding IsProcessesSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsProcessesSelected, Mode=TwoWay}"
                                  Command="{Binding NavigateToProcessesCommand}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
@@ -127,7 +127,7 @@
 
                     <!-- Ports Nav (Active Phase 6) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsChecked="{Binding IsPortsSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsPortsSelected, Mode=TwoWay}"
                                  Command="{Binding NavigateToPortsCommand}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
@@ -140,7 +140,7 @@
 
                     <!-- Commands Nav (Active Phase 11) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsChecked="{Binding IsCommandsSelected, Mode=OneWay}"
+                                 IsChecked="{Binding IsCommandsSelected, Mode=TwoWay}"
                                  Command="{Binding NavigateToCommandsCommand}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
@@ -151,11 +151,11 @@
                         </StackPanel>
                     </RadioButton>
 
-                    <!-- Settings Nav (Disabled in Foundation Phase) -->
+                    <!-- Settings Nav (Active Phase 13) -->
                     <RadioButton Style="{StaticResource Style.Button.Nav}"
-                                 IsEnabled="False"
-                                 Margin="0,18,0,0"
-                                 ToolTip="Available in Settings phase">
+                                 IsChecked="{Binding IsSettingsSelected, Mode=TwoWay}"
+                                 Command="{Binding NavigateToSettingsCommand}"
+                                 Margin="0,18,0,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Width="16" Height="16" Stretch="Uniform"
                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"

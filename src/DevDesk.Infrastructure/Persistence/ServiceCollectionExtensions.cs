@@ -40,6 +40,9 @@ public static class ServiceCollectionExtensions
         // Project lifecycle service
         services.AddSingleton<IProjectService, ProjectService>();
 
+        // Settings service
+        services.AddSingleton<DevDesk.Core.Settings.ISettingsService, DevDesk.Infrastructure.Settings.SettingsService>();
+
         return services;
     }
 }

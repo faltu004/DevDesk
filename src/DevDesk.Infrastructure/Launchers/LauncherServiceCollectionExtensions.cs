@@ -19,7 +19,8 @@ public static class LauncherServiceCollectionExtensions
         services.AddSingleton<ILauncherService>(sp => new LauncherService(
             sp.GetRequiredService<IExternalToolLocator>(),
             sp.GetRequiredService<IProcessRunner>(),
-            sp.GetRequiredService<ILogger<LauncherService>>()));
+            sp.GetRequiredService<ILogger<LauncherService>>(),
+            sp.GetService<DevDesk.Core.Settings.ISettingsService>()));
         return services;
     }
 }

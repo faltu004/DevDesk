@@ -20,6 +20,7 @@ public sealed class DevDeskSmokeTests
     [InlineData(typeof(ProjectLogsView))]
     [InlineData(typeof(ProjectGitView))]
     [InlineData(typeof(DevDesk.App.Views.Commands.CommandsView))]
+    [InlineData(typeof(DevDesk.App.Views.Settings.SettingsView))]
     public void Views_InstantiateAndResolveResources_OnStaThread(Type viewType)
     {
         RunOnSta(() =>

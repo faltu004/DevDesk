@@ -1,3 +1,5 @@
+using DevDesk.Core.Settings;
+
 namespace DevDesk.Infrastructure.Launchers;
 
 /// <summary>
@@ -8,7 +10,8 @@ internal enum TerminalType
     None,
     WindowsTerminal,
     PowerShell7,
-    WindowsPowerShell
+    WindowsPowerShell,
+    CommandPrompt
 }
 
 /// <summary>
@@ -33,8 +36,7 @@ internal interface IExternalToolLocator
     string? FindExplorerExecutable();
 
     /// <summary>
-    /// Discovers the preferred terminal executable in precedence order:
-    /// Windows Terminal (wt.exe) -> PowerShell 7 (pwsh.exe) -> Windows PowerShell (powershell.exe).
+    /// Discovers the preferred terminal executable honoring the user's preference with safe fallback.
     /// </summary>
-    TerminalLaunchTarget? FindPreferredTerminal();
+    TerminalLaunchTarget? FindPreferredTerminal(PreferredTerminal preference = PreferredTerminal.Auto);
 }
