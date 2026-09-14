@@ -23,4 +23,15 @@ public partial class DashboardView : UserControl
             button.ContextMenu.IsOpen = true;
         }
     }
+
+    protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+        if (e.Key == System.Windows.Input.Key.K && (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) == System.Windows.Input.ModifierKeys.Control)
+        {
+            DashboardSearchTextBox?.Focus();
+            DashboardSearchTextBox?.SelectAll();
+            e.Handled = true;
+        }
+    }
 }

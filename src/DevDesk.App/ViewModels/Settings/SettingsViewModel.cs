@@ -227,6 +227,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IAsyncInitializab
         }
     }
 
+    public event EventHandler<string>? RequestScrollToCategory;
+
     [RelayCommand]
     public void SelectCategory(SettingsCategoryItem category)
     {
@@ -235,6 +237,19 @@ public sealed partial class SettingsViewModel : ViewModelBase, IAsyncInitializab
         foreach (var c in Categories)
         {
             c.IsSelected = string.Equals(c.Id, category.Id, StringComparison.OrdinalIgnoreCase);
+        }
+        RequestScrollToCategory?.Invoke(this, category.Id);
+    }
+
+    public void UpdateSelectedCategoryFromScroll(string categoryId)
+    {
+        if (string.IsNullOrWhiteSpace(categoryId)) return;
+        if (string.Equals(SelectedCategoryId, categoryId, StringComparison.OrdinalIgnoreCase)) return;
+
+        SelectedCategoryId = categoryId;
+        foreach (var c in Categories)
+        {
+            c.IsSelected = string.Equals(c.Id, categoryId, StringComparison.OrdinalIgnoreCase);
         }
     }
 

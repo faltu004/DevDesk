@@ -40,10 +40,13 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
     private string _subtitle = "Your development environment at a glance.";
 
     [ObservableProperty]
-    private string _searchPlaceholder = "Search projects, processes, ports or run a command...";
+    private string _searchPlaceholder = "Search projects...";
 
     [ObservableProperty]
     private string _searchShortcut = "Ctrl + K";
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
 
     [ObservableProperty]
     private bool _hasActiveProjects;
@@ -131,6 +134,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
     private CancellationTokenSource? _pollingCts;
     private Task? _pollingLoopTask;
     private long _activeGeneration;
+    private IReadOnlyList<DeveloperProject> _allProjects = Array.Empty<DeveloperProject>();
 
     public bool IsPollingActive => _pollingCts != null && !_pollingCts.IsCancellationRequested;
 
@@ -1000,42 +1004,8 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
     {
         DispatchOnUiThread(() =>
         {
-            ActiveProjects.Clear();
-            foreach (var project in projects)
-            {
-                var session = _runnerService?.GetSession(project.Id);
-                bool isRunning = session?.State == ProjectRunState.Running;
-                string statusText = isRunning
-                    ? "Running"
-                    : session?.State switch
-                    {
-                        ProjectRunState.Starting => "Starting",
-                        ProjectRunState.Stopping => "Stopping",
-                        _ => "Stopped"
-                    };
-                string portText = isRunning && project.DefaultPort.HasValue
-                    ? $"Port {project.DefaultPort.Value}"
-                    : "Port —";
-                bool hasActivePort = isRunning && project.DefaultPort.HasValue;
-
-                var item = new DashboardProjectItem
-                {
-                    Id = project.Id,
-                    Name = project.Name,
-                    Path = project.Path,
-                    FrameworkBadge = !string.IsNullOrWhiteSpace(project.Framework) ? project.Framework : "Generic",
-                    CategoryBadge = !string.IsNullOrWhiteSpace(project.Language)
-                        ? project.Language
-                        : (!string.IsNullOrWhiteSpace(project.PackageManager) ? project.PackageManager : "Project"),
-                    StatusText = statusText,
-                    IsRunning = isRunning,
-                    PortText = portText,
-                    HasActivePort = hasActivePort,
-                    IconKind = ResolveIconKind(project.Framework)
-                };
-                ActiveProjects.Add(item);
-            }
-            HasActiveProjects = ActiveProjects.Count > 0;
+            _allProjects = projects;
+            FilterActiveProjects();
 
             RecentProjects.Clear();
             var recentList = projects
@@ -1065,13 +1035,90 @@ public sealed partial class DashboardViewModel : ViewModelBase, IAsyncInitializa
         });
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        FilterActiveProjects();
+    }
+
+    private void FilterActiveProjects()
+    {
+        ActiveProjects.Clear();
+        var query = SearchText?.Trim();
+        var matching = _allProjects.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            matching = matching.Where(p =>
+                p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                p.Path.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                (p.Framework != null && p.Framework.Contains(query, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        foreach (var project in matching)
+        {
+            var session = _runnerService?.GetSession(project.Id);
+            bool isRunning = session?.State == ProjectRunState.Running;
+            string statusText = isRunning
+                ? "Running"
+                : session?.State switch
+                {
+                    ProjectRunState.Starting => "Starting",
+                    ProjectRunState.Stopping => "Stopping",
+                    _ => "Stopped"
+                };
+            string portText = isRunning && project.DefaultPort.HasValue
+                ? $"Port {project.DefaultPort.Value}"
+                : "Port —";
+            bool hasActivePort = isRunning && project.DefaultPort.HasValue;
+
+            var item = new DashboardProjectItem
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Path = project.Path,
+                FrameworkBadge = !string.IsNullOrWhiteSpace(project.Framework) ? project.Framework : "Generic",
+                CategoryBadge = !string.IsNullOrWhiteSpace(project.Language)
+                    ? project.Language
+                    : (!string.IsNullOrWhiteSpace(project.PackageManager) ? project.PackageManager : "Project"),
+                StatusText = statusText,
+                IsRunning = isRunning,
+                PortText = portText,
+                HasActivePort = hasActivePort,
+                IconKind = ResolveIconKind(project.Framework)
+            };
+            ActiveProjects.Add(item);
+        }
+        HasActiveProjects = ActiveProjects.Count > 0;
+    }
+
+    [RelayCommand]
+    public void SubmitSearch()
+    {
+        if (_navigationService != null && _projectsViewModel != null)
+        {
+            _projectsViewModel.SetSearchText(SearchText);
+            _navigationService.NavigateTo(NavigationItem.Projects);
+        }
+    }
+
     private void UpdateEnvironmentSummary(IReadOnlyList<DeveloperProject> projects)
     {
-        if (EnvironmentSummary.Count > 0)
+        if (EnvironmentSummary.Count >= 4)
         {
             int runningCount = projects.Count(p => _runnerService?.GetSession(p.Id)?.State == ProjectRunState.Running);
             EnvironmentSummary[0].Value = runningCount.ToString();
             EnvironmentSummary[0].Subtext = $"of {projects.Count} total";
+
+            int configuredPorts = projects.Count(p => p.DefaultPort.HasValue);
+            EnvironmentSummary[1].Value = configuredPorts.ToString();
+            EnvironmentSummary[1].Subtext = configuredPorts == 1 ? "configured port" : "configured ports";
+
+            int gitRepos = projects.Count(p => p.IsGitRepository);
+            EnvironmentSummary[2].Value = gitRepos.ToString();
+            EnvironmentSummary[2].Subtext = gitRepos == 1 ? "tracked repo" : "tracked repos";
+
+            EnvironmentSummary[3].Value = "0";
+            EnvironmentSummary[3].Subtext = "all clear";
         }
     }
 

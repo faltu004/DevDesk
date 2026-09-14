@@ -7,6 +7,7 @@
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         mc:Ignorable="d"
         Title="{Binding AppTitle}"
+        Icon="pack://application:,,,/Resources/Branding/DevDesk.ico"
         Height="820" Width="1340"
         MinHeight="660" MinWidth="1040"
         WindowStartupLocation="CenterScreen"
@@ -44,7 +45,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Stylized DevDesk 3D Cube Logo Icon -->
+                    <!-- DevDesk Brand Logo -->
                     <Border Grid.Column="0"
                             Width="38"
                             Height="38"
@@ -54,19 +55,13 @@
                             BorderThickness="1"
                             VerticalAlignment="Center"
                             Margin="0,0,12,0">
-                        <Canvas Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <!-- Left Face -->
-                            <Path Data="M11,2 L2,7 L2,15 L11,20 Z"
-                                  Fill="{DynamicResource Brush.Accent.Primary}" />
-                            <!-- Right Face -->
-                            <Path Data="M11,2 L20,7 L20,15 L11,20 Z"
-                                  Fill="{DynamicResource Brush.Accent.Light}"
-                                  Opacity="0.88" />
-                            <!-- Top Highlight Edge -->
-                            <Path Data="M11,2 L2,7 L11,11 L20,7 Z"
-                                  Fill="#5EEAD4"
-                                  Opacity="0.65" />
-                        </Canvas>
+                        <Image Source="pack://application:,,,/Resources/Branding/DevDesk-Logo-Transparent.png"
+                               Width="30"
+                               Height="30"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
                     </Border>
 
                     <!-- Title & Subtitle -->

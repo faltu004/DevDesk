@@ -104,7 +104,8 @@
                               Data="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
 
                         <!-- Search TextBox -->
-                        <TextBox Grid.Column="1"
+                        <TextBox x:Name="ProjectSearchTextBox"
+                                 Grid.Column="1"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                  Background="Transparent"
                                  Foreground="{DynamicResource Brush.Text.Primary}"
@@ -715,7 +716,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Row 1: Tab Bar (Overview / Logs / Scripts / Environment / Notes) -->
+                        <!-- Row 1: Tab Bar (Overview / Logs / Git) -->
                         <Border Grid.Row="1" BorderBrush="{DynamicResource Brush.Border.Subtle}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
                             <StackPanel Orientation="Horizontal">
                                 <!-- Overview Tab Button -->
@@ -778,7 +779,7 @@
 
                                 <!-- Git Tab Button -->
                                 <Button Command="{Binding SelectDetailsTabCommand}" CommandParameter="Git"
-                                        Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" Margin="0,0,14,0">
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0">
                                     <Button.Template>
                                         <ControlTemplate TargetType="{x:Type Button}">
                                             <Border x:Name="TabBorder" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="6,6">
@@ -799,19 +800,6 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-
-                                <!-- Scripts (disabled) -->
-                                <Border Padding="6,6" Margin="0,0,12,0">
-                                    <TextBlock Text="Scripts" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                </Border>
-                                <!-- Environment (disabled) -->
-                                <Border Padding="6,6" Margin="0,0,12,0">
-                                    <TextBlock Text="Environment" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                </Border>
-                                <!-- Notes (disabled) -->
-                                <Border Padding="6,6">
-                                    <TextBlock Text="Notes" FontSize="12.5" Foreground="{DynamicResource Brush.Text.Disabled}" />
-                                </Border>
                             </StackPanel>
                         </Border>
 

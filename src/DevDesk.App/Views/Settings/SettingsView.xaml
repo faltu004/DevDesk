@@ -119,11 +119,11 @@
             </Border>
 
             <!-- ==================== CENTER: SETTINGS CARDS ==================== -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="SettingsScrollViewer" Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,10,0">
 
                     <!-- SECTION: GENERAL -->
-                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                    <Border x:Name="SectionGeneral" Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="General"
                                        Style="{StaticResource Style.Text.Title}"
@@ -168,7 +168,7 @@
                     </Border>
 
                     <!-- SECTION: EDITORS & TERMINALS -->
-                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                    <Border x:Name="SectionEditors" Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="Editors &amp; Terminals"
                                        Style="{StaticResource Style.Text.Title}"
@@ -282,7 +282,7 @@
                     </Border>
 
                     <!-- SECTION: MONITORING -->
-                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                    <Border x:Name="SectionMonitoring" Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="Monitoring"
                                        Style="{StaticResource Style.Text.Title}"
@@ -323,7 +323,7 @@
                     </Border>
 
                     <!-- SECTION: DATA & ABOUT -->
-                    <Border Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
+                    <Border x:Name="SectionData" Style="{StaticResource Style.Border.Card}" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="Data &amp; Preferences"
                                        Style="{StaticResource Style.Text.Title}"

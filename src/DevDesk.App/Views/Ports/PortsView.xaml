@@ -123,7 +123,8 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="PortsSearchTextBox"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                  Background="Transparent"
                                  Foreground="{DynamicResource Brush.Text.Primary}"
                                  BorderThickness="0"

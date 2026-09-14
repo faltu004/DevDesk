@@ -36,6 +36,41 @@ public partial class MainWindow : Window
         _commandExecutor = commandExecutor;
     }
 
+    protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+        if (e.Key == System.Windows.Input.Key.K && (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) == System.Windows.Input.ModifierKeys.Control)
+        {
+            var searchBox = FindVisualChild<System.Windows.Controls.TextBox>(this, tb => tb.Name.EndsWith("SearchTextBox", StringComparison.OrdinalIgnoreCase));
+            if (searchBox != null)
+            {
+                searchBox.Focus();
+                searchBox.SelectAll();
+                e.Handled = true;
+            }
+        }
+    }
+
+    private static T? FindVisualChild<T>(System.Windows.DependencyObject parent, Func<T, bool>? predicate = null) where T : System.Windows.DependencyObject
+    {
+        int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            if (child is T typedChild && (predicate == null || predicate(typedChild)) && (child as System.Windows.UIElement)?.IsVisible == true)
+            {
+                return typedChild;
+            }
+
+            var descendant = FindVisualChild<T>(child, predicate);
+            if (descendant != null)
+            {
+                return descendant;
+            }
+        }
+        return null;
+    }
+
     protected override async void OnClosing(CancelEventArgs e)
     {
         if (_isShutdownConfirmed)

@@ -445,6 +445,18 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
+    public void ClearSearch()
+    {
+        SearchText = string.Empty;
+    }
+
+    public void SetSearchText(string query)
+    {
+        SearchText = query ?? string.Empty;
+        ApplyFilter();
+    }
+
+    [RelayCommand]
     public void SelectProject(ProjectPresentationModel? project)
     {
         if (project is not null)
@@ -655,7 +667,7 @@ public sealed partial class ProjectsViewModel : ViewModelBase, IDisposable
         LogsViewModel.Dispose();
     }
 
-    private void ApplyFilter()
+    public void ApplyFilter()
     {
         FilteredProjects.Clear();
 
