@@ -17,14 +17,11 @@ Welcome to the initial release of **DevDesk**, a local-first Windows developer c
 ## Project Management
 
 - Register local code repositories and workspaces with custom aliases, descriptions, and run configurations.
-- Heuristic auto-detection for popular project frameworks and stacks:
-  - **.NET**: C#, F#, VB.NET, Solution / Project detection (`dotnet run`, `dotnet build`, `dotnet test`).
-  - **Node.js / Web**: Vite, Next.js, React, Vue, Svelte, Angular, Express (`npm`, `pnpm`, `yarn`, `bun`).
-  - **Python**: Django, Flask, FastAPI (`python`, `pytest`).
-  - **Rust**: Cargo workspaces and binaries (`cargo run`, `cargo test`).
-  - **Go**: Go modules (`go run`, `go test`).
-  - **Java**: Maven, Gradle (`mvn`, `gradle`).
-- Automatic extraction of configured application ports, package managers, and default build/test scripts.
+- Heuristic auto-detection for supported project frameworks and stacks:
+  - **.NET**: C#, F#, VB.NET solutions and projects (`dotnet run`, `dotnet build`, `dotnet test`).
+  - **Node.js / Web**: Next.js, Vite, React, Node.js (`npm`, `pnpm`, `yarn`, `bun`).
+  - **Python**: Django, Flask, FastAPI (`python`, `pytest`, `poetry`, `uv`, `pipenv`, `pip`).
+- Automatic detection of entry scripts, package managers, and suggested build/run/test commands.
 - Edit project properties or unregister workspaces without deleting source code on disk.
 
 ---
@@ -42,10 +39,10 @@ Welcome to the initial release of **DevDesk**, a local-first Windows developer c
 ## Process & Port Inspection
 
 - **Process Inspector**:
-  - Live inventory of active processes on the machine with special filtering for developer runtimes (`node.exe`, `dotnet.exe`, `python.exe`, `cargo.exe`, `git.exe`, `docker.exe`).
-  - Tracks PID, private memory working set, and sampled CPU utilization.
-  - Graceful inspection under standard user permissions without crashing on system or protected processes.
-  - Distinguishes DevDesk-managed processes from external system processes.
+  - System-wide inventory of active processes with PID, sampled CPU utilization, and private memory working set.
+  - Ownership mode filtering to distinguish DevDesk-managed processes from external system processes.
+  - Real-time text search filtering across process names, PIDs, and associated project paths.
+  - Standard-user execution requiring no administrative elevation for normal inspection.
 - **TCP Listener & Port Inspector**:
   - Live scan of all local TCP endpoints in `Listening` state using native IP Helper APIs (`GetExtendedTcpTable`).
   - Correlates listening ports to owning PIDs and executable process names.

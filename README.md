@@ -50,7 +50,7 @@ DevDesk unifies these development activities into a single, cohesive, local-firs
 ## Features
 
 - **Project Manager**: Register and track local repositories and workspaces with customized run, build, and test commands.
-- **Auto-Detection**: Scans project roots to detect technology stacks (.NET, Node.js, Next.js, Python, Rust, Go, Java, Docker, Vite), entry scripts, package managers, and default ports.
+- **Auto-Detection**: Scans project roots to detect technology stacks (.NET, Node.js, Next.js, Vite, React, Python), entry scripts, and package managers.
 - **Developer Launchers**: One-click opening into VS Code, default terminal (PowerShell, Windows Terminal, Command Prompt, Git Bash), or File Explorer.
 - **TCP Listener Inspector**: Real-time snapshot of active TCP listeners, owning process names, PIDs, addresses, and proactive port conflict detection against configured projects.
 - **DevDesk-Owned Project Runner**: Starts and supervises project processes inside Windows Job Objects for robust tree-scoped lifecycle management.
