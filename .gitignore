@@ -4,6 +4,8 @@
 [Ll]og/
 [Ll]ogs/
 *.log
+artifacts/
+publish/
 
 ## Visual Studio & IDEs
 .vs/

@@ -301,7 +301,12 @@ public class SettingsViewModelAndNavigationTests
             null,
             action => action());
 
-        Assert.False(string.IsNullOrWhiteSpace(vm.DevDeskVersion));
+        var appAssembly = typeof(SettingsViewModel).Assembly;
+        var assemblyVersion = appAssembly.GetName().Version;
+        Assert.NotNull(assemblyVersion);
+        var expectedVersion = $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}";
+        Assert.Equal(expectedVersion, vm.DevDeskVersion);
+        Assert.Equal("1.0.0", vm.DevDeskVersion);
         Assert.False(string.IsNullOrWhiteSpace(vm.PlatformDisplay));
         Assert.Equal(@"C:\Users\test\AppData\Local\DevDesk\Data\devdesk.db", vm.DatabasePath);
     }
